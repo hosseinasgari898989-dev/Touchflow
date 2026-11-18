@@ -1,0 +1,37 @@
+name: Export Grandma Connect native source snapshot
+
+on:
+  push:
+    branches:
+      - work/native-source-inspection-2026-11-19
+    paths:
+      - '.github/workflows/export-native-source.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  export-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout baseline
+        uses: actions/checkout@v4
+
+      - name: Verify and extract source archive
+        run: |
+          test -s GrandmaConnectNative-source.zip
+          unzip -t GrandmaConnectNative-source.zip
+          mkdir -p extracted
+          unzip -q GrandmaConnectNative-source.zip -d extracted
+          test -f extracted/GrandmaConnectNative/settings.gradle.kts
+          test -f extracted/GrandmaConnectNative/app/build.gradle.kts
+          find extracted/GrandmaConnectNative -maxdepth 5 -type f | sort
+
+      - name: Upload extracted native source
+        uses: actions/upload-artifact@v4
+        with:
+          name: grandma-connect-native-source-snapshot
+          path: extracted/GrandmaConnectNative/
+          if-no-files-found: error
+          retention-days: 7
