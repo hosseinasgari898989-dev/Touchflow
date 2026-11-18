@@ -5,7 +5,6 @@ on:
     branches: [main]
     paths:
       - 'GrandmaConnectNative-source.zip'
-      - '.github/workflows/build-android.yml'
 
 permissions:
   contents: read
