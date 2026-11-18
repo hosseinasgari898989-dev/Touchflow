@@ -2,9 +2,9 @@ name: Build Grandma Connect APK
 
 on:
   push:
-    branches: [main, feature/expanded-capture-settings-2026-11-19]
+    branches: [feature/expanded-capture-settings-2026-11-19]
     paths:
-      - 'GrandmaConnectNative-source.zip'
+      - '.source-v2/READY'
 
 permissions:
   contents: read
@@ -17,10 +17,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Verify and extract native project
+      - name: Assemble and verify native source archive
         run: |
-          test -s GrandmaConnectNative-source.zip
-          unzip -q GrandmaConnectNative-source.zip -d .
+          test -s .source-v2/READY
+          cat .source-v2/part-* > /tmp/source-v2.b64
+          base64 --decode /tmp/source-v2.b64 > GrandmaConnectNative-source-v2.tar.xz
+          tar -tJf GrandmaConnectNative-source-v2.tar.xz >/dev/null
+          tar -xJf GrandmaConnectNative-source-v2.tar.xz
+          test -f GrandmaConnectNative/settings.gradle.kts
+          test -f GrandmaConnectNative/app/src/main/java/com/grandmaconnect/MacroSettings.kt
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -44,7 +49,15 @@ jobs:
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: grandma-connect-debug-apk
+          name: grandma-connect-expanded-capture-debug-apk
           path: GrandmaConnectNative/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload reproducible source archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: grandma-connect-expanded-capture-source
+          path: GrandmaConnectNative-source-v2.tar.xz
           if-no-files-found: error
           retention-days: 30
