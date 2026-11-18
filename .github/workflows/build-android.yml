@@ -2,7 +2,7 @@ name: Build Grandma Connect APK
 
 on:
   push:
-    branches: [main]
+    branches: [main, feature/expanded-capture-settings-2026-11-19]
     paths:
       - 'GrandmaConnectNative-source.zip'
 
