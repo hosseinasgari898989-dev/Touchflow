@@ -7,66 +7,70 @@ Last updated: 2026-11-19
 - Project: **TouchFlow**
 - Repository: https://github.com/hosseinasgari898989-dev/Touchflow
 - Default branch: `main`
-- Cleanup branch: `feature/touchflow-clean-foundation-2026-11-19`
-- Documentation PR: [#1 — establish TouchFlow v1 baseline and cleanup rules](https://github.com/hosseinasgari898989-dev/Touchflow/pull/1) — OPEN, DRAFT, NOT MERGED.
+- Documentation branch: `feature/touchflow-clean-foundation-2026-11-19`
+- Documentation PR: [#1](https://github.com/hosseinasgari898989-dev/Touchflow/pull/1) — open, draft, not merged.
+- Selected source commit: `36b67597a86a84c093cc9c50ec2e32af6e4dbad8`
+- Immutable source backup branch: `backup/touchflow-v1-native-source-2026-11-19`
+- Native cleanup work branch: `feature/touchflow-v1-native-cleanup-2026-11-19`
 
-## Initial APK baseline
+## Baseline APK
 
-- Internal designation: `TouchFlow v1.0.0-baseline` (not a verified embedded APK version)
-- Original upload: `GrandmaConnect-preview.apk`
-- Preserved copy: `/mnt/data/TouchFlow-v1.0.0-baseline.apk`
+- Original filename: `GrandmaConnect-preview.apk`
+- Preserved filename: `TouchFlow-v1.0.0-baseline.apk`
 - Size: 866,747 bytes
 - SHA-256: `6dce713dfebcbf84ed5a175b6eb73808791765464087526875c3fe6f11bd0b89`
-- ZIP integrity test: PASS
-- Package/version/signer metadata: NOT VERIFIED
-- Binary committed to GitHub: NO; preserved in current work session and backup-kit ZIP.
-- Match to known main/simple/integration build outputs: NO; all three differ byte-for-byte.
+- Package: `com.grandmaconnect.preview`
+- versionCode: 1
+- versionName: `0.1.0-alpha-preview`
+- minSdk / targetSdk: 24 / 35
+- Label: Grandma Connect
+- debuggable: true
+- allowBackup: false
+- Baseline certificate fingerprint: `7E:AE:68:77:3E:0E:AF:E0:B1:FB:A9:32:01:CE:67:DC:2B:6D:FB:21:57:FC:81:54:73:23:95:A9:C7:06:1D:08`
+- Original private signing key: NOT FOUND.
+- Full apksigner verification: NOT RUN.
 
-## Backup kit
+## Source lineage
 
-- Local bundle: `/mnt/data/TouchFlow-v1.0.0-backup-kit.zip`
-- Bundle SHA-256: `2be92336c6ab173e48633b420ae9898289582fea2193c68c497be996af8976a1`
-- Contains the owner APK, its SHA-256 record, three source candidate archives, and build comparison notes.
-- The backup kit is downloadable from this conversation; it is not yet stored in the GitHub repository.
+- High-confidence matching source: artifact of workflow run 44399759542.
+- Branch: `feature/expanded-capture-settings-2026-11-19`.
+- Source commit: `36b67597a86a84c093cc9c50ec2e32af6e4dbad8`.
+- Source archive SHA-256: `e77c6b383251cd584b60cd6f4ae6b0ab445202970758d2c851e8bdc359b97a98`.
+- CI APK from that source: 866,755 bytes; SHA-256 `46b48ac853739a44d8b1ff1ec7da341a984cb6fa91b4a0c541f075086f5a5770`.
+- Manifest, all DEX files, Kotlin builtins and Accessibility config are identical; only resources.arsc differs by 8 bytes.
+- CI build signer differs from baseline; in-place update is blocked pending original key recovery.
 
-## Repository findings
+## Current app capabilities and gaps
 
-- Main root: `.github/`, `GrandmaConnectNative-source.zip`, `README.md`
-- Main workflow builds a debug APK when the source ZIP changes; it is not a versioned release pipeline.
-- Existing branches:
-  - `backup/native-baseline-2026-11-19`
-  - `feature/expanded-capture-settings-2026-11-19`
-  - `feature/touchflow-simple-runner-2026-11-19`
-  - `feature/touchflow-webview-integration-20261119`
-  - `work/native-source-inspection-2026-11-19`
-- The source candidates and three build comparisons are documented in `docs/INITIAL_AUDIT.md`.
+- Recording is in-app canvas only; no global touch recorder across other apps.
+- Playback uses AccessibilityService dispatchGesture.
+- App declares canRetrieveWindowContent=false.
+- Macro JSON is stored privately; allowBackup=false; no user-facing export/import.
+- Extended duration options reach 10 minutes, with a hard 10-minute app limit.
+- WebView timeline/keyframe UI remains mock/prototype, not a working persisted editor.
 
-## Source review findings
+## Completed
 
-- Main source keeps legacy `Grandma Connect` identity; Gradle says namespace/applicationId `com.grandmaconnect`, versionName `0.1.0-alpha`, minSdk 24, targetSdk 35.
-- Simple Runner adds native capture settings and the TouchFlow app label. Extended capacity still has a 10-minute hard ceiling; quality and duration settings are not unlimited.
-- WebView Integration adds offline UI and an allowlisted native bridge. Its gesture editor uses mock track data; keyframe persistence/easing dispatch and backup import/export are explicitly unsupported in this slice.
-- Successful CI does not equal real device testing. Browser rendering and physical-device checks for these experimental branches are NOT VERIFIED.
-
-## Completed in this task
-
-- Created `feature/touchflow-clean-foundation-2026-11-19` from main.
-- Rebranded README to TouchFlow.
-- Added `docs/BASELINE.md`, `docs/RELEASE_POLICY.md`, `docs/INITIAL_AUDIT.md`, and this state file.
-- Created a local baseline copy and backup-kit ZIP with checksum and three source candidate archives.
-- Opened draft PR #1. It contains documentation only and has not been merged.
-- No source code, manifest, build workflow, permission, secret, variable, or deployment setting changed.
-- Main and `backup/native-baseline-2026-11-19` remain unchanged.
-- No APK release has been published.
+- Rebranded project documentation to TouchFlow on a dedicated branch.
+- Created immutable baseline copy and backup-kit versions 1 and 2.
+- Identified high-confidence source lineage by comparing every APK ZIP entry.
+- Extracted baseline and CI signer certificate fingerprints; determined they differ.
+- Created backup and native cleanup branches from the matched source commit.
+- Added/updated BASELINE, RELEASE_POLICY, INITIAL_AUDIT and CLEANUP_PLAN docs (on documentation branch).
+- No application source, Manifest, Gradle file, workflow, permission, secret, variable or deployment config has been changed.
+- `main` and `backup/native-baseline-2026-11-19` remain unchanged.
+- No APK release published and no PR merged.
 
 ## Next steps
 
-1. Inspect the owner's APK package, embedded version, and signer with Android SDK tools.
-2. Identify the source/build that produced this exact APK; do not assume the main source ZIP or experimental previews are equivalent.
-3. Select one clean source base after reviewing source diffs and regression risks.
-4. Prepare an explicit add/change/remove list before touching application files.
-5. Implement a versioned release process that stores each APK immutably with checksums and source/build evidence.
+1. Search for/recover the original signing keystore or document the separate-install migration path.
+2. Review the exact cleanup plan; do not delete any core Kotlin module.
+3. Begin a small branding-only source PR while retaining package IDs and internal identifiers.
+4. Add and test user-controlled macro export/import before data/package migrations.
+5. Prototype API33 TouchInteractionController on the Galaxy A14 as a separate opt-in experiment; no promise of transparent global recording until proven.
+6. Implement timeline/keyframe only against actual native macro data and tested persistence.
+7. Build, inspect signature/version/package and run device regression before any publication.
 
 ## Continuity
 
-Update this file after every material decision, commit, test, failure, or changed next step. Record unknowns as `NOT VERIFIED`; do not infer a pass.
+Update after every material decision, branch, PR, commit, test or failure. Mark unknowns NOT FOUND / NOT VERIFIED; do not infer success.
