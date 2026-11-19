@@ -120,3 +120,19 @@ Update after every material decision, branch, PR, commit, test or failure. Mark 
 - Current outcome: **RETRY PENDING — NO GREEN BUILD YET**. Recheck Run 2 and inspect the actual JUnit, build, APK, package/label/signature evidence before reporting success.
 - Do not begin Step 2 yet. Save physical-device retest remains separate.
 - See `PROJECT_HANDOFF.md` sections 12.8–12.9 for complete evidence and test diagnosis.
+
+
+## Step 1 final CI — SUCCESS (2026-11-20)
+
+- Run 2 [44633470736](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44633470736) completed success on isolated branch `feature/step1-build-bootstrap-2026-11-20`, commit `15d1c2668e10b6cb5ca81b2c54039475b731f5d9`.
+- Tests: 13 passed, 0 failed, 0 errors, 0 skipped. The explicit one-line test fixture correction is documented at `.github/patches/step1-search-rules-test-fixture.patch`; no production application code changed for the retry.
+- assembleDebug: success. Package `com.grandmaconnect.feature`, label `TouchFlow`, version `0.1.0-alpha-feature`, SDK min/target 24/35.
+- APK size 1,127,351 bytes. SHA-256: `7b7da543f4c2bceaf75e23bbae7d894e09dd20b4aee84cd4441d8838dd170576`.
+- Signature verified (APK Signature Scheme v2). Debug certificate SHA-256: `15f8e0ac1944f5e4351240b88203c875ac46059a41c260ca20a474acedba7f26`.
+- Manifest/badging shows only permission `android.permission.POST_NOTIFICATIONS`; Accessibility config retains `canRetrieveWindowContent=false`.
+- Artifact [14583062276](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44633470736/artifacts/14583062276), expires 2026-12-19; it includes APK, original archive, patch, test reports and verification files.
+- Original Claude archive is unchanged and its SHA-256 was reverified from the artifact.
+- **Step 1 CI gate PASSED.** This does not constitute a device acceptance test. Save persistence, widget playback, and Full-Screen/global capture are still not verified on the target Galaxy A14.
+- Do not install this APK as an update to `com.grandmaconnect.preview`; it is a separate debug package. Do not attempt updating an older `.feature` installation without matching its signer.
+- Step 2 (macro editor) has NOT started; obtain scope/acceptance before beginning.
+- Full evidence: `PROJECT_HANDOFF.md` sections 12.8–12.10.
