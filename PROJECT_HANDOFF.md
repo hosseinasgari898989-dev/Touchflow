@@ -311,3 +311,41 @@ Status: DONE (documentation entry)
 | 2026-11-19 | ثبت درخواست و تصمیم‌ها | DONE | `feature/touchflow-first-feature-pack-2026-11-19` | هنوز اجرا نشده | UI از نو طراحی نمی‌شود؛ پیاده‌سازی Native از Simple Runner آغاز می‌شود |
 
 **آخرین گام انجام‌شده:** شاخهٔ backup و feature ساخته شده‌اند. سورس از artifact موفق Run 44525646233 بازیابی شده است. قبل از هر ادعای تکمیل، نتیجهٔ تست و Build باید در همین فایل ثبت شود.
+
+
+### 2026-11-19 — پیاده‌سازی مرحلهٔ اول در working copy
+Status: IN PROGRESS (کد محلی آمادهٔ بسته‌بندی؛ هنوز به شاخه Push نشده)
+Branch: `feature/touchflow-first-feature-pack-2026-11-19`
+Base commit: `f479a3b10d7639ae1207915f3d9f2efbfc6cbcdc`
+Files changed locally:
+- `app/src/main/java/com/grandmaconnect/MacroSplitRules.kt` — قانون‌های خالص Split بین گروه‌های کامل لمس.
+- `app/src/main/java/com/grandmaconnect/MacroModels.kt` — Schema 3، نگهداری Split markerها و خواندن Schema 1/2؛ نوع اقدام `GO_BACK`.
+- `app/src/main/java/com/grandmaconnect/MainActivity.kt` — Timeline editor ساده، درج برنامه هنگام ضبط در boundary کامل، گزینهٔ GO_BACK، خروج Activity پس از شروع موفق playback، و استفادهٔ مستقیم از LayoutParams صحیح.
+- `app/src/main/java/com/grandmaconnect/TouchCanvasView.kt` — بررسی boundary امن برای افزودن action هنگام ضبط.
+- `app/src/main/java/com/grandmaconnect/MacroAccessibilityService.kt` — اجرای GO_BACK و اعتبارسنجی جهت صفحه/اجازهٔ اعلان پیش از playback.
+- `app/src/main/java/com/grandmaconnect/MacroWidget.kt` — Widget انتخاب ماکرو به‌ازای هر widgetId و اجرای مستقیم در AccessibilityService.
+- `app/src/main/res/layout/widget_macro.xml`, `drawable/widget_macro_background.xml`, `xml/widget_macro_info.xml`, Manifest و strings — پوسته و ثبت ویجت.
+- `app/src/test/java/com/grandmaconnect/MacroSplitRulesTest.kt` — تست JUnit.
+- `tools/MacroSplitRulesTest.kt` — تست standalone برای اجرای سریع محلی.
+- `app/build.gradle.kts` — وابستگی JUnit.
+
+Tests performed:
+- TDD RED: تست Split پیش از وجود implementation با خطای unresolved reference شکست خورد؛ پس از اضافه‌شدن MacroSplitRules سبز شد.
+- Kotlin standalone: `MacroSplitRulesTest: 10 assertions passed`.
+- XML parsing: تمام ۷ فایل XML فعلی بدون خطای syntax parse شدند.
+- Build محلی: NOT RUN؛ در محیط فعلی Gradle و Android SDK نصب نیستند. Build باید از GitHub Actions گرفته شود.
+- تست گوشی: NOT RUN؛ هنوز روی Galaxy A14 تست نشده است.
+
+Important current behavior:
+- ضبط full-screen پیشین حفظ شده؛ دکمهٔ شناور «＋ برنامه» هنگام ضبط، فقط پس از پایان کامل gesture group اجازهٔ درج Launch App می‌دهد.
+- چند برنامه با ترتیب درج‌شده در action list قابل ثبت‌اند؛ هنگام playback هر Launch App مکث دارد و gesture group بعدی پس از مکث اجرا می‌شود.
+- Splitها فقط marker هستند و group/point/timing/action را حذف یا تغییر نمی‌دهند.
+- ویجت برای هر widgetId یک macroId دارد؛ اگر دسترسی یا اعلان موجود نباشد، playback خاموش و بی‌خبر انجام نمی‌شود و برنامه پیام راهنما باز می‌کند.
+- فونت اختصاصی داخل APK هنوز اضافه نشده؛ تم از `sans-serif` سیستم و fallback فارسی/عربی Android استفاده می‌کند. خوانایی روی گوشی باید تست شود.
+
+Next:
+1. رفع ریزه‌کاری‌های UI/Manifest و تست‌های اضافه.
+2. بسته‌بندی سورس به آرشیو hash-locked در `.touchflow-feature/`.
+3. افزودن workflow مختص شاخهٔ feature و اجرای `testDebugUnitTest assembleDebug`.
+4. بازبینی Diff/Build و به‌روزرسانی همین فایل با نتیجهٔ واقعی CI.
+5. تست دستی Widget و playback چندبرنامه‌ای روی دستگاه هدف قبل از ادغام.
