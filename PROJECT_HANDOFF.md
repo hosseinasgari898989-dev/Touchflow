@@ -987,11 +987,12 @@ Latest confirmed save-fix APK:
 - راه امن ادامه: فایل باینری اصلی با GitHub web upload یا یک مسیر Git binary-capable روی همین شاخه ثبت شود؛ سپس SHA-256 فایل داخل GitHub با مقدار `8811c815e01c415e48dde1f18a4b94e35d8c87bc6c106b6e2462d6ddb623f30c` تطبیق داده شود. اگر فقط امکان متن وجود داشت، ابتدا یک روش chunking مستقل و قابل بازتولید با تأیید hash طراحی و آزمایش شود؛ هرگز از روی حافظه یا دستی Base64 نساز.
 
 ### 12.4 وضعیت Workflow گام ۱
-- فایل تحویلی Claude در این نشست خوانده و از نظر YAML با `yaml.safe_load` parse شد. سپس نسخهٔ مستقل آن با نام پیشنهادی `.github/workflows/build-touchflow-step1.yml` آماده شد تا Workflow قبلی `.github/workflows/build-touchflow-feature-pack.yml` overwrite نشود.
-- نسخهٔ جدید، در فایل محلی این نشست، اصلاح گزارش‌گیری `aapt2 dump badging` را دارد: خروجی کامل در `badging.txt` نوشته می‌شود و با `head` قطع نمی‌شود.
-- نسخهٔ جدید permissionها را برای بازبینی ثبت می‌کند، اما allow-list را enforce نمی‌کند؛ شرط `canRetrieveWindowContent="false"` نیز در آن وجود دارد.
-- **Workflow جدید هنوز در branch ثبت نشده و اجرا نشده است.** علت: پیش از قرار دادن Workflow و فعال‌کردن Push trigger باید فایل باینری سورس به‌طور کامل و با hash درست در branch موجود باشد.
-- نسخهٔ قبلی Workflow در شاخهٔ مبنا دست‌نخورده است. فایل جدید نباید آن را overwrite یا triggerهایش را تغییر دهد.
+- فایل تحویلی Claude در این نشست خوانده و از نظر YAML با `yaml.safe_load` parse شد. نسخهٔ آماده‌شده برای پروژه با نام `.github/workflows/build-touchflow-step1.yml` در حال حاضر به‌صورت پیش‌نویسِ غیرفعال در `docs/ci/build-touchflow-step1.yml.pending` نگهداری می‌شود.
+- پیش‌نویس مستقل از Workflow قبلی است؛ فایل فعال قبلی `.github/workflows/build-touchflow-feature-pack.yml` روی شاخهٔ مبنا overwrite نشده است.
+- پیش‌نویس، اصلاح گزارش‌گیری `aapt2 dump badging` را دارد: خروجی کامل در `badging.txt` نوشته می‌شود و با `head` قطع نمی‌شود.
+- پیش‌نویس permissionها را برای بازبینی ثبت می‌کند، اما allow-list را enforce نمی‌کند؛ شرط `canRetrieveWindowContent="false"` نیز در آن وجود دارد.
+- Workflow پیش‌نویس انتظار دارد فایل اصلی `TouchFlow-Step1-source.tar.xz` در ریشهٔ branch باشد و SHA آن را پیش از extract بررسی کند.
+- **Workflow هنوز در `.github/workflows/` فعال نشده و اجرا نشده است.** پس از بارگذاری و تطبیق SHA آرشیو، فایل pending را به `.github/workflows/build-touchflow-step1.yml` منتقل کن؛ سپس Push روی همان branch باید Workflow را اجرا کند.
 
 ### 12.5 وضعیت Build و دروازهٔ بعدی
 - شاخهٔ گام ۱ و تغییرات مستندات در GitHub ایجاد شده‌اند؛ اما فایل سورس باینری و Workflow جدید هنوز به این شاخه اضافه نشده‌اند. بنابراین **هیچ Push دارای ورودی Build انجام نشده و Run واقعی گام ۱ NOT RUN / NOT VERIFIED است.**
@@ -1002,3 +1003,14 @@ Latest confirmed save-fix APK:
 - تست واقعی Save روی Galaxy A14 برای APK قبلی همچنان `NOT YET DONE` است. این دروازه با موفقیت Build جدید خودکار بسته نمی‌شود.
 - گام ۲ (ویرایشگر ماکرو) فقط پس از سبزشدن Build گام ۱ و بازبینی گزارش آن شروع می‌شود.
 - آخرین وضعیت را با branch، commit، workflow run URL/ID، نتیجهٔ دقیق تست، Artifact ID و SHA-256 APK در همین فایل ثبت کن؛ از نوشتن «سبز» بدون مدرک Run خودداری کن.
+
+
+### 12.6 دستور ادامه برای گفتگوی بعدی
+1. ابتدا `PROJECT_HANDOFF.md`، سپس `PROJECT_STATE.md` و این بخش را بخوان؛ آخرین branch کاری `feature/step1-build-bootstrap-2026-11-20` است.
+2. وضعیت فعلی branch و main را از GitHub دوباره بخوان؛ به SHAهای این یادداشت بدون بررسی جدید تکیه نکن.
+3. فایل اصلی تحویلی Claude را با نام دقیق `TouchFlow-Step1-source.tar.xz` در ریشهٔ همین branch بارگذاری کن؛ پس از Upload SHA-256 فایل روی branch را با مقدار ثبت‌شده در بخش 12.2 مقایسه کن. تا وقتی تطبیق نشده، Workflow را فعال نکن.
+4. فایل `docs/ci/build-touchflow-step1.yml.pending` را به `.github/workflows/build-touchflow-step1.yml` منتقل کن؛ Workflow قدیمی را تغییر نده.
+5. Push را فقط روی branch گام ۱ انجام بده. Trigger جدید روی تغییر آرشیو و فایل Workflow است؛ نیازی به تغییر main یا triggerهای موجود نیست.
+6. فقط پس از Run واقعی، گزارش لاگ، تست‌های اجراشده، APK، package، label، امضا و permissionها را ثبت کن. در شکست، فقط همان خطای ثبت‌شده را اصلاح کن.
+7. پس از سبزشدن Build، دروازهٔ تست دستگاه و تست Save همچنان جدا هستند. گام ۲ تا بررسی کامل گام ۱ شروع نشود.
+
