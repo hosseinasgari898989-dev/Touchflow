@@ -408,3 +408,28 @@ Status: DONE (integrity check); IN PROGRESS (Android CI pending)
 - GitHub blob نهایی `part-05`: `00329522e7c4bb5b38a8106e7b74321e8e84a706`.
 - GitHub blob نهایی `part-07`: `ca5e5385d988b52dcb31598b59fb33d06d434c14`.
 - اکنون می‌توان READY و workflow را اضافه کرد و CI را اجرا کرد.
+
+
+### 2026-11-19 — تشخیص و اصلاح اولین شکست کامپایل
+Status: FIX APPLIED LOCALLY; CI RETEST PENDING
+Previous run: [44600591255](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44600591255)
+Previous run result:
+- Archive verification: SUCCESS.
+- Preview identity isolation: SUCCESS.
+- JDK 17, Gradle 8.9, Android SDK 35 setup: SUCCESS.
+- Kotlin compilation: FAILED.
+- Exact compiler diagnostics:
+  - `MacroWidget.kt:82:5 'onCreate' overrides nothing.`
+  - `MacroWidget.kt:82:47 Unresolved reference 'Bundle'.`
+- Root cause: `MacroWidgetConfigureActivity.onCreate(savedInstanceState: Bundle?)` lacked `import android.os.Bundle`.
+- Minimal correction: added only `import android.os.Bundle` to `MacroWidget.kt`; no lifecycle behavior changed.
+- Local pure Kotlin split test rerun after the fix: `MacroSplitRulesTest: 10 assertions passed`.
+- Current source archive regenerated:
+  - SHA-256: `117becdf5b48a585303c1a9cc4d2648038795abdcada00639f2c4b5a7989a4d0`
+  - Size: 25,384 bytes.
+  - Base64 chars: 33,848.
+  - Segments: 9 (8 × 4,200 + 248).
+- Correction is isolated to branch `feature/touchflow-feature-pack-bundle-fix-2026-11-19`.
+- Backup branch `backup/touchflow-feature-pack-before-ci-fix-2026-11-19` preserves failed-CI state.
+- Retry workflow will run only when `.touchflow-feature/READY` changes, preventing partial source updates from triggering duplicate Builds.
+- Next: upload all 9 updated segments, verify reconstructed SHA, update READY last, then inspect the new CI result.
