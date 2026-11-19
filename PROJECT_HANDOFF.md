@@ -433,3 +433,54 @@ Previous run result:
 - Backup branch `backup/touchflow-feature-pack-before-ci-fix-2026-11-19` preserves failed-CI state.
 - Retry workflow will run only when `.touchflow-feature/READY` changes, preventing partial source updates from triggering duplicate Builds.
 - Next: upload all 9 updated segments, verify reconstructed SHA, update READY last, then inspect the new CI result.
+
+
+---
+
+# نقطهٔ توقف پایدار — 2026-11-19 23:19 (Europe/Berlin)
+
+## وضعیت دقیق شاخه
+- شاخهٔ اجرایی فعال: `feature/touchflow-feature-pack-bundle-fix-2026-11-19`
+- آخرین commit تأییدشده: `80e62c645a378366431119eaae243945d56e9177`
+- Backup قبل از اصلاح CI: `backup/touchflow-feature-pack-before-ci-fix-2026-11-19`
+- شاخهٔ اصلی: تغییری نکرده است؛ merge انجام نشده.
+- PR برای این بسته هنوز ساخته نشده است.
+
+## وضعیت Build قبلی
+- Run: [44600591255](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44600591255)
+- آرشیو و جداسازی package تأیید شدند؛ JDK 17، Gradle 8.9 و Android SDK 35 نیز آماده شدند.
+- کامپایل Kotlin شکست خورد؛ علت ریشه‌ای فقط import جاافتادهٔ `android.os.Bundle` در `MacroWidget.kt` بود.
+- import در سورس اصلاح شد. تست مستقل Split: 10/10 assertion passed.
+- APK در آن Run تولید نشد؛ مرحله‌های verify و upload اجرا نشدند.
+
+## وضعیت آرشیو اصلاح‌شده
+- آرشیو محلی: `/mnt/data/touchflow-feature-source-fix1.tar.xz`
+- فایل Base64 محلی: `/mnt/data/touchflow-feature-source-fix1.b64`
+- SHA-256 تأییدشده با Python و `sha256sum`: `117becdf5b48a585303c1a9cc4d2648038795abdcada00639f2c4b5a7989a4d0`
+- حجم: 25,384 bytes؛ Base64: 33,848 chars.
+- ساختار قطعات: 8 قطعهٔ 4,200 کاراکتری + قطعهٔ پایانی 248 کاراکتری.
+- هر ۹ قطعه از GitHub مجدداً خوانده شدند؛ Git Blob SHA هر قطعه با SHA متناظر قطعهٔ محلی برابر است.
+- قطعهٔ ناسازگار قبلی فقط `part-07` بود؛ اکنون به مقدار دقیق محلی تصحیح شده و Git Blob SHA آن `4c76f01cde974d12e31df7c9e032695f797b89b7` است.
+- نکتهٔ ابزار: یک پیاده‌سازی دستی SHA-256 در محیط JS عدد متفاوتی گزارش کرد؛ به آن خروجی اعتماد نکن. معیار قابل اتکا فعلاً SHA-256 محلی Python و برابری Git Blob هر ۹ قطعه است. CI با `sha256sum -c` مرجع نهایی تطبیق آرشیو روی Runner خواهد بود.
+
+## وضعیت Workflow اصلاحی
+- فایل: `.github/workflows/build-touchflow-feature-pack.yml`
+- فقط روی branch `feature/touchflow-feature-pack-bundle-fix-2026-11-19` اجرا می‌شود.
+- فقط تغییر `.touchflow-feature/READY` آن را trigger می‌کند؛ آپلود تکه‌های آرشیو باعث Build ناقص یا چندباره نمی‌شود.
+- expected SHA در Workflow به `117becdf5b48a585303c1a9cc4d2648038795abdcada00639f2c4b5a7989a4d0` تغییر کرده است.
+- **گام بعدی فوری:** محتوای `.touchflow-feature/READY` را به همین SHA تغییر بده؛ این تغییر Run اصلاحی را آغاز می‌کند.
+
+## تعداد مراحل باقی‌مانده
+1. **CI مجدد:** تغییر READY، بررسی sha256/tar و اجرای JUnit + assembleDebug. (هنوز انجام نشده)
+2. **رفع خطاهای احتمالی:** فقط بر اساس خطای واقعی CI، با backup و checkpoint تازه. (در انتظار)
+3. **اعتبارسنجی APK:** package باید `com.grandmaconnect.feature`، label باید `TouchFlow Feature Preview` و امضا معتبر باشد؛ سپس Artifact APK بارگذاری شود. (در انتظار)
+4. **تست واقعی Galaxy A14 / Android 13:** تمام‌صفحه، درج برنامه در مرز gesture، اجرای چند برنامه، Back، Split/Unsplit و عدم تغییر دادهٔ ماکرو، Widget، شروع سریع و بسته‌شدن Activity، توقف از اعلان، نمایش فارسی. (در انتظار؛ CI به‌تنهایی جای این تست را نمی‌گیرد)
+5. **بازبینی نهایی و PR:** Diff کامل و نتایج تست بررسی شوند؛ PR بساز، اما تا تأیید صریح صاحب پروژه merge نکن. (در انتظار)
+
+## محدودیت‌ها و تصمیم‌های تثبیت‌شده
+- ضبط فعلی داخل TouchFlow است. ضبط خام لمس‌های سایر برنامه‌ها روی Android 13 هنوز قابلیت اثبات‌شده نیست؛ فعلاً sequence چندبرنامه‌ای در playback از طریق AccessibilityService ارائه می‌شود.
+- تمام‌صفحهٔ موجود حفظ می‌شود؛ هنگام ضبط، «＋ برنامه» فقط در مرز امن پس از پایان گروه کامل لمس درج می‌شود تا خود دکمه/انتخاب برنامه داخل ماکرو ذخیره نشود.
+- Split فقط marker میان گروه‌های کامل است؛ نباید event، coordinate، timestamp یا action حذف/جابجا شود.
+- ویجت برای هر widgetId به macroId مشخص متصل می‌شود؛ اجرای موفق باید Activity را باز نگذارد و توقف از Notification ممکن باشد.
+- فونت اختصاصی هنوز اضافه نشده؛ این نسخه از `sans-serif` سیستم و fallback فارسی/عربی Android استفاده می‌کند. خوانایی روی گوشی تأیید نشده است.
+- نسخهٔ آزمایشی با package جدا ساخته می‌شود؛ هرگز APK مرجع یا نصب فعلی را overwrite نکن.
