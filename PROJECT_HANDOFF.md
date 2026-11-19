@@ -651,3 +651,36 @@ Status: IN PROGRESS
 - هر فرضیه را با شواهد رد/تأیید کن؛ در هر دور یک علت مشخص را بررسی کن.
 - اگر stack trace در دسترس نیست، اول روش جمع‌آوری آن را حل کن؛ بدون آن وارد اصلاحات کور نشو.
 - اولویت این چرخه فقط این است: **بازتولید → ثبت stack trace → علت ریشه‌ای → patch حداقلی → تست startup → ثبت نتیجه**.
+
+### 2026-11-19 23:31 — بررسی P0 مربوط به Crash هنگام Startup
+Status: BLOCKED (runtime stack trace لازم است؛ علت ریشه‌ای هنوز NOT IDENTIFIED)
+Branch: `feature/touchflow-feature-pack-bundle-fix-2026-11-19`
+Reference handoff commit: `a77733dd433a4eebd0aa67011e9d02914ed3c087`
+CI run: [44602552416](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44602552416)
+Source commit used by CI: `8f4092e077eaa82c196d6b8403201b3ed3df72a8`
+
+**Artifact identity and integrity**
+- Source artifact `14569031661` downloaded successfully; ZIP size 25,576 bytes; ZIP SHA-256 `f3c18d099046efcabf7596eeea125f63af504a5030912d965dd16da3ab113102`.
+- The embedded `TouchFlowFeaturePack-source.tar.xz` was extracted; size 25,384 bytes; computed SHA-256 `117becdf5b48a585303c1a9cc4d2648038795abdcada00639f2c4b5a7989a4d0` — MATCH with the owner-provided expected hash.
+- APK artifact `14569201389` downloaded and extracted; APK size 898,093 bytes; computed SHA-256 `4783947f21c77e2d804f4901b9079645a261510cce00fb933f3f2fc8384e767e` — MATCH with the recorded APK hash.
+- Both artifacts are listed under Run `44602552416`, branch `feature/touchflow-feature-pack-bundle-fix-2026-11-19`, source head `8f4092e077eaa82c196d6b8403201b3ed3df72a8`.
+
+**Static startup path inspected**
+- Manifest launcher: `.MainActivity`, MAIN/LAUNCHER, exported=true; app theme `@style/AppTheme`.
+- `MainActivity.onCreate()` calls, in order: `setNormalSystemBars()`, `showHome()`, `handleWidgetHelpIntent(intent)`.
+- `showHome()` checks Accessibility state, calls `MacroStore.loadAll()`, creates the home views and installs the content view.
+- `MacroStore.loadAll()` catches per-file JSON parsing/validation exceptions and returns an empty list if the macro directory cannot be listed.
+- The inspected synchronous startup path and referenced theme/Manifest code did not establish a definite crash cause. No runtime `FATAL EXCEPTION`, `Caused by`, or Logcat trace has been provided. Therefore: **ROOT CAUSE UNKNOWN; no code change justified**.
+- CI workflow performs JUnit and APK assembly/package/signature verification only; it does not launch the APK on Android.
+- Runtime tools in this investigation environment: `adb`, `emulator`, Android SDK, `aapt`, and `apkanalyzer` are NOT AVAILABLE. APK launch/reproduction and device stack trace are NOT VERIFIED.
+
+**Repository documentation check**
+- `PROJECT_STATE.md` at repository root: NOT FOUND at the referenced handoff commit.
+- `docs/` directory: NOT FOUND at the referenced handoff commit.
+- No contents were inferred from these missing paths.
+
+**Changes and next required evidence**
+- No Kotlin, Manifest, resource, Gradle, workflow, APK, baseline, or main-branch files were changed.
+- No Build was rerun; no PR or merge was created.
+- Next: obtain a bug report/Logcat from the device immediately after reproducing the crash. The required evidence is the complete `FATAL EXCEPTION` block, its `Caused by` chain, and the first app stack frames. Diagnose only after that evidence is available.
+- Until the real-device launch succeeds, all feature testing remains BLOCKED.
