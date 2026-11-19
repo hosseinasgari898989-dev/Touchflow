@@ -108,3 +108,15 @@ Update after every material decision, branch, PR, commit, test or failure. Mark 
 - Overall CI status: **PENDING — NOT VERIFIED**. Do not say Build/test passed until run conclusion and logs are inspected.
 - Main remains `6c738c2214d4244913fe449ed6172db613f844bd`; backup baseline remains `d62899f0eb586a870471648fd3d77d4b8f50fb8d`; PR #4 Open / Unmerged. Continue only on the Step 1 feature branch.
 - For full evidence, read `PROJECT_HANDOFF.md` section 12.7.
+
+
+## Step 1 CI result / retry — 2026-11-20
+
+- Run 1 [44633139815](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44633139815): FAILURE during JUnit only. Archive SHA check, extraction, JDK17, Gradle8.9, Android SDK35 and source/test compilation succeeded. 13 tests executed: 12 passed, 1 failed. No APK was built; assembleDebug was skipped.
+- Failing assertion: `SearchRulesTest.kt:30`, test `allTokensMustMatchAcrossFields`. Persian token `چت` was tested against English package token `chat`, but SearchRules does no synonym/translation mapping. JUnit XML artifact ID `14582318844` confirms.
+- Exact test-only patch: `.github/patches/step1-search-rules-test-fixture.patch`; replaces only query term `چت` with `chat` for the multi-field assertion. No production code, Manifest, permission or app runtime logic changed. Original archive remains untouched and hash-verified.
+- Workflow applies this explicit patch after source extraction; patch path is included in workflow triggers and uploaded diagnostics artifact.
+- Retry Run 2 [44633470736](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44633470736), commit `15d1c2668e10b6cb5ca81b2c54039475b731f5d9`, job `135945912338`, was in progress at the last check; checkout was executing and remaining steps pending.
+- Current outcome: **RETRY PENDING — NO GREEN BUILD YET**. Recheck Run 2 and inspect the actual JUnit, build, APK, package/label/signature evidence before reporting success.
+- Do not begin Step 2 yet. Save physical-device retest remains separate.
+- See `PROJECT_HANDOFF.md` sections 12.8–12.9 for complete evidence and test diagnosis.
