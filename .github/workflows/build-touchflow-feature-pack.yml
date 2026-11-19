@@ -6,7 +6,6 @@ on:
       - 'feature/touchflow-r1-recording-actions-2026-11-20'
     paths:
       - 'TouchFlow-R1-source.tar.xz'
-      - '.github/workflows/build-touchflow-feature-pack.yml'
 
 permissions:
   contents: read
