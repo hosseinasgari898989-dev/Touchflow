@@ -784,3 +784,14 @@ Result: `completed / success`
 - New APK physical launch on target Galaxy A14 / Android 13: NOT VERIFIED.
 - No PR or merge created. `main`, baseline APK/source and pre-fix backup branch remain untouched.
 - Next and only acceptance step: owner installs/opens the new APK with package `com.grandmaconnect.feature` alongside the baseline, confirms whether the home screen opens without closing, and reports the result. Do not continue feature work until that runtime check passes.
+
+### 2026-11-19 — یادداشت مهم سازگاری امضای APKهای Preview
+Status: DONE (identity comparison)
+- گواهی امضای V2 APK قبلی `14569201389` با SHA-256 گواهی `92dd216fd2c322b95f9345982eb6be23c585bcf11e1f1d24593ccd161b00cdf3` استخراج شد.
+- گواهی امضای V2 APK جدید `14572996352` با SHA-256 گواهی `a6bde76a086753bd4e115014aa9a2e4713907b18be71842bf5c371ffa5aa72f5` استخراج شد.
+- اثرانگشت‌ها متفاوت‌اند؛ بنابراین نصب APK جدید روی نسخهٔ قبلی با همان package ممکن است با خطای signature conflict رد شود.
+- این Previewها package جدا از baseline دارند:
+  - Feature Preview: `com.grandmaconnect.feature`
+  - Baseline app: `com.grandmaconnect.preview`
+- اگر برای تست نیاز به جایگزینی Preview قبلی باشد، فقط برنامهٔ `TouchFlow Feature Preview` را حذف کنید؛ APK/برنامهٔ baseline با package `com.grandmaconnect.preview` را حذف نکنید. حذف Preview قبلی داده‌های همان package را پاک می‌کند؛ اگر دادهٔ قابل نگهداری در آن وجود دارد، پیش از حذف باید مسیر جایگزین با package مجزا یا امضای پایدار بررسی شود.
+- هیچ کلید خصوصی یا keystore جدیدی ساخته/ثبت/منتشر نشده است.
