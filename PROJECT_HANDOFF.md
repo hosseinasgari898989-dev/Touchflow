@@ -744,3 +744,43 @@ Original source commit used by failed APK: `8f4092e077eaa82c196d6b8403201b3ed3df
 - No PR or merge created.
 - No Android runtime/device is attached to this coding environment; new APK must still be launched on the target phone.
 - Next: update READY to trigger one CI run; inspect source patch step, JUnit, Build, APK identity/signature and artifacts; then have owner launch only the new `com.grandmaconnect.feature` APK and confirm the home screen opens. Do not resume feature development before that real-device check.
+
+### 2026-11-19 — CI اصلاح‌شده موفق و APK جدید ساخته شد
+Status: NOT VERIFIED (Build موفق است؛ اجرای واقعی APK جدید روی گوشی هنوز منتظر تأیید مالک)
+Branch: `feature/touchflow-feature-pack-bundle-fix-2026-11-19`
+Commit triggering CI: `a6726636d0ea5151f48b472fe79444cc4984a6bc`
+Workflow run: [44610974639](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44610974639)
+Job ID: `135867168997`
+Result: `completed / success`
+
+**CI details**
+- Source archive integrity verification: SUCCESS; original input archive hash remained `117becdf5b48a585303c1a9cc4d2648038795abdcada00639f2c4b5a7989a4d0`.
+- Step `Apply minimal startup crash fix`: SUCCESS.
+- Preview identity isolation: SUCCESS.
+- JDK 17, Gradle 8.9 and Android SDK 35 setup: SUCCESS.
+- `testDebugUnitTest assembleDebug`: SUCCESS; `BUILD SUCCESSFUL in 41s`.
+- APK verification: package `com.grandmaconnect.feature`, label `TouchFlow Feature Preview`, versionName `0.1.0-alpha-feature`; `apksigner verify --verbose` SUCCESS, APK Signature Scheme v2=true.
+- All 12 primary job steps and post steps completed successfully.
+
+**New artifacts**
+- APK artifact: [14572996352](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44610974639/artifacts/14572996352)
+  - ZIP size: 889,060 bytes; ZIP SHA-256: `f1888805eebeb1624550f13d5a681eb7705373d6801e62c891b18e7130b9d22f`.
+  - Extracted APK size: 898,109 bytes.
+  - Extracted APK SHA-256: `d86b54c0ae817dd8d901748a578179ff3ca1bad087c80d3e94427eaf827929c8`.
+- Patched source artifact: [14572941401](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44610974639/artifacts/14572941401)
+  - ZIP size: 25,468 bytes; ZIP SHA-256: `1b01d2572c54f604de30fbbda47d75c17ea4b149a6f418980f4b2f225cbd6d16`.
+  - Embedded tar.xz size: 25,252 bytes.
+  - Embedded tar.xz SHA-256: `65369edaa79b0f25f5c9aeffada4c1f66f118fc96b25225326a5a2341bf4a6f8`.
+- Both artifacts were downloaded and their local hashes verified against the workflow API's artifact ZIP digests / build log.
+- A file-by-file comparison between original and patched tar archives confirmed exactly one changed source file:
+  `GrandmaConnectNative/app/src/main/java/com/grandmaconnect/MainActivity.kt`.
+  File set remains unchanged (23 files); no added or removed archive members.
+
+**Current status**
+- Root cause: CONFIRMED from physical-device bugreport.
+- Minimal patch: APPLIED.
+- Standalone Split regression test: 10/10 passed.
+- CI unit test + Android Build + package/signature verification: PASSED.
+- New APK physical launch on target Galaxy A14 / Android 13: NOT VERIFIED.
+- No PR or merge created. `main`, baseline APK/source and pre-fix backup branch remain untouched.
+- Next and only acceptance step: owner installs/opens the new APK with package `com.grandmaconnect.feature` alongside the baseline, confirms whether the home screen opens without closing, and reports the result. Do not continue feature work until that runtime check passes.
