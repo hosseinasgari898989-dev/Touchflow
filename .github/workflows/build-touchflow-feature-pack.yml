@@ -6,6 +6,7 @@ on:
       - 'feature/touchflow-r1-recording-actions-2026-11-20'
     paths:
       - 'TouchFlow-R1-source.tar.xz'
+      - '.github/workflows/build-touchflow-feature-pack.yml'
 
 permissions:
   contents: read
@@ -38,6 +39,25 @@ jobs:
           test -f "$PROJECT_DIR/app/src/main/AndroidManifest.xml"
           echo "Test sources Gradle will see:"
           find "$PROJECT_DIR/app/src/test" -name '*.kt' | sort
+
+      # The same incorrect Persian-vs-English package-token fixture was corrected
+      # in the successful Step 1 CI. This changes only the extracted test fixture,
+      # never the uploaded source archive or production app code.
+      - name: Correct the SearchRules test fixture only
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("GrandmaConnectNative/app/src/test/java/com/grandmaconnect/SearchRulesTest.kt")
+          old = 'SearchRules.matches("چت تلگرام", "تلگرام", "org.telegram.chat")'
+          new = 'SearchRules.matches("chat تلگرام", "تلگرام", "org.telegram.chat")'
+          source = p.read_text(encoding="utf-8")
+          count = source.count(old)
+          if count != 1:
+              raise SystemExit(f"Expected exactly one outdated test fixture, found {count}")
+          p.write_text(source.replace(old, new, 1), encoding="utf-8")
+          PY
+          grep -F 'SearchRules.matches("chat تلگرام", "تلگرام", "org.telegram.chat")' "$PROJECT_DIR/app/src/test/java/com/grandmaconnect/SearchRulesTest.kt"
+          ! grep -F 'SearchRules.matches("چت تلگرام", "تلگرام", "org.telegram.chat")' "$PROJECT_DIR/app/src/test/java/com/grandmaconnect/SearchRulesTest.kt"
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
