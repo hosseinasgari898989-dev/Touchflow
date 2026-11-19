@@ -1054,3 +1054,24 @@ Latest confirmed save-fix APK:
 - Job `build` ID `135945912338` was `in_progress` at the last observation. Checkout was running; subsequent steps were pending.
 - Expected next checks: archive hash, extraction, application of the documented test-only patch, JUnit (13 tests), nonzero count, assembleDebug, package/label/signature and privacy config.
 - Second run conclusion, artifacts and APK hash: **NOT YET VERIFIED**. Fetch current run/job before claiming result.
+
+
+### 12.10 نتیجهٔ نهایی Build گام ۱ — Run 2 SUCCESS (2026-11-20)
+- Run: [44633470736](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44633470736), run number 2, event `push`, head commit `15d1c2668e10b6cb5ca81b2c54039475b731f5d9`, job ID `135945912338`.
+- نتیجهٔ Run: `completed / success`.
+- تمام 14 مرحلهٔ اصلی job با `success` تمام شدند، شامل: archive SHA verification، extraction، test-fixture patch، JDK17، Gradle8.9، Android SDK35، JUnit، nonzero test count assertion، assembleDebug، package/label/signature verification و artifact upload.
+- JUnit XMLهای Artifact مستقلاً خوانده شدند: SearchRulesTest 6/6، MacroNamingTest 3/3، MacroSplitRulesTest 4/4؛ مجموع `13 tests, 0 failures, 0 errors, 0 skipped`.
+- Artifact: [touchflow-feature-build #14583062276](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44633470736/artifacts/14583062276), حجم ZIP برابر 1,293,860 bytes، retention تا 2026-12-19. Artifact شامل سورس archive اصلی، APK، badging، JUnit XML/HTML، signature، permission list و patch تست است.
+- فایل archive داخل Artifact دوباره هش شد و همان SHA-256 اصلی Claude را داشت: `8811c815e01c415e48dde1f18a4b94e35d8c87bc6c106b6e2462d6ddb623f30c`.
+- APK: `GrandmaConnectNative/app/build/outputs/apk/debug/app-debug.apk`; size `1,127,351 bytes`; SHA-256 `7b7da543f4c2bceaf75e23bbae7d894e09dd20b4aee84cd4441d8838dd170576`. مقدار با `apk.sha256` داخل Artifact تطبیق شد.
+- Package: `com.grandmaconnect.feature`; label: `TouchFlow`; versionCode `1`; versionName `0.1.0-alpha-feature`; minSdk `24`; targetSdk `35`.
+- امضا با `apksigner verify --verbose --print-certs` موفق بود؛ V2 فعال. Certificate SHA-256: `15f8e0ac1944f5e4351240b88203c875ac46059a41c260ca20a474acedba7f26`.
+- Permission list واقعی در badging: فقط `android.permission.POST_NOTIFICATIONS`.
+- Accessibility config همچنان `android:canRetrieveWindowContent="false"` است.
+- APK محلی برای تحویل به مالک در نشست ساخته/کپی شده: `/mnt/data/TouchFlow-Step1-feature-preview.apk`؛ این مسیر فقط در نشست فعلی قابل استفاده است. برای دانلود پایدار از Artifact GitHub استفاده شود.
+- APK یک Debug build با کلید Debug جدید است. Package آن از baseline اصلی `com.grandmaconnect.preview` جداست. آن را جایگزین baseline فرض نکن؛ نصب روی یک نسخهٔ قبلی با همین package `.feature` نیز بدون تطبیق certificate قبلی ممکن است با خطای امضا مواجه شود.
+- **Build گام ۱: PASSED.** این فقط موفقیت CI و Unit Tests است؛ تست روی دستگاه، Save persistence، Widget، Global/Full-Screen capture و تجربهٔ واقعی کاربر هنوز تأیید نشده‌اند.
+- Save retest روی Galaxy A14 برای APK قبلی همچنان `NOT YET DONE` است؛ این گیت مستقل باقی می‌ماند.
+- گام ۲ (ویرایشگر ماکرو) هنوز شروع نشده و برای شروعش باید محدوده و پذیرش مالک ثبت شود.
+- در آخرین بررسی پس از Run 2: `main` هنوز `6c738c2214d4244913fe449ed6172db613f844bd`، baseline backup هنوز `d62899f0eb586a870471648fd3d77d4b8f50fb8d` و PR #4 همچنان Open / Unmerged بود.
+
