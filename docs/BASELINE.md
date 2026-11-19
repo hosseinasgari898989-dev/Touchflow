@@ -2,7 +2,7 @@
 
 **Internal designation:** `TouchFlow-v1.0.0-baseline`  
 **Embedded Android version:** `0.1.0-alpha-preview` (versionCode 1)  
-**Status:** preserved owner-provided baseline; its source lineage is now identified with high confidence, but its signing key is not available yet.
+**Status:** preserved owner APK; the exact successful CI build and source archive have now been identified.
 
 ## Owner-provided APK
 
@@ -29,29 +29,24 @@
 
 The designation `v1.0.0-baseline` is a project label only; it does not replace the embedded app version shown above.
 
-## Source lineage — high-confidence match
+## Exact source and build provenance
 
-The candidate native source is the archive produced by successful workflow run [44399759542](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44399759542):
+The owner APK is byte-for-byte identical to the successful GitHub Actions build artifact from [run 44399521736](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44399521736):
 
-- Source branch: `feature/expanded-capture-settings-2026-11-19`
-- Source commit: `36b67597a86a84c093cc9c50ec2e32af6e4dbad8`
-- Source archive: `GrandmaConnectNative-source-v2.tar.xz`
+- Workflow: `Build Grandma Connect APK`
+- Branch: `feature/expanded-capture-settings-2026-11-19`
+- Exact source commit: `36600aa02fba13430ba6a1e9e2efc09f665b7b67`
+- Result: success
+- APK size and SHA-256 from the run: 866,747 bytes; `6dce713dfebcbf84ed5a175b6eb73808791765464087526875c3fe6f11bd0b89`
+- Source artifact: `GrandmaConnectNative-source-v2.tar.xz`
 - Source archive SHA-256: `e77c6b383251cd584b60cd6f4ae6b0ab445202970758d2c851e8bdc359b97a98`
+- The run's signing certificate fingerprint is the same as the owner APK.
 
-Its successful CI APK is 866,755 bytes, SHA-256 `46b48ac853739a44d8b1ff1ec7da341a984cb6fa91b4a0c541f075086f5a5770`. The APK entry comparison shows:
-
-- AndroidManifest.xml: identical
-- classes.dex, classes2.dex, classes3.dex: identical
-- Kotlin builtins and accessibility_service_config.xml: identical
-- resources.arsc: differs by 8 bytes (baseline 1,284 bytes; CI build 1,292 bytes)
-- Overall APK size: differs by 8 bytes
-
-This is a high-confidence source-to-baseline match at the compiled-code and manifest level. It is not a byte-for-byte match, and the reason for the 8-byte resource-table difference is not yet established.
+This is an exact source-build provenance match, not merely a similar build. The archive from later run 44399759542 has the same source archive hash/content, but its output APK used a different debug certificate and differed in `resources.arsc` by 8 bytes. Do not assume later ephemeral CI builds preserve the original signing identity.
 
 ## Update/signing blocker
 
-The corresponding CI APK has a different debug certificate fingerprint:
-`37:12:86:D4:6F:87:4E:E1:BC:BC:83:CF:77:09:02:19:06:90:EE:C2:E8:85:2E:E1:E8:5C:32:3A:8B:52:C0:75`.
+The baseline signing certificate is known, and the exact build run has been found. However, the private debug keystore was not included in the source or APK artifacts and was not found in the inspected repository tree.
 
 Android accepts an in-place app update only when the application ID matches and the signing certificate matches (or an accepted signing lineage exists); the version code must also be equal or higher. See [Android app updates](https://developer.android.com/google/play/app-updates) and [Android app signing](https://developer.android.com/studio/publish/app-signing).
 
@@ -75,5 +70,5 @@ This is a preserved baseline, not a production-signed release. Before publishing
 1. Recover and validate the original signing identity, or plan an explicit separate-install migration.
 2. Preserve the app ID for direct updates and increment versionCode.
 3. Add macro export/import and verify round-trip recovery before any package/data migration.
-4. Build from the selected source, inspect the manifest/signature, and test on the target phone.
+4. Build from the exact selected source, inspect the manifest/signature, and test on the target phone.
 5. Publish each APK as an immutable versioned artifact with checksum, source commit, build run, and release notes.
