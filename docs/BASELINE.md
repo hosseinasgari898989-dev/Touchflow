@@ -1,33 +1,36 @@
 # Initial APK baseline
 
-**Status:** preserved reference candidate; not yet confirmed as a reproducible release.
+**Project designation:** `TouchFlow v1.0.0-baseline`  
+**Status:** first owner-provided reference APK; not yet verified as a reproducible or signed release.
 
 ## Owner-provided artifact
 
 - Original filename: `GrandmaConnect-preview.apk`
-- Working copy name: `TouchFlow-v1-baseline.apk`
+- Preserved copy in this work session: `/mnt/data/TouchFlow-v1.0.0-baseline.apk`
 - Size: `866,747 bytes`
 - SHA-256: `6dce713dfebcbf84ed5a175b6eb73808791765464087526875c3fe6f11bd0b89`
-- Container/archive integrity check: passed (`unzip -t`)
-- APK Signing Block: detected by the file inspection utility
+- ZIP integrity test: passed (`unzip -t`)
+- APK Signing Block: present
 - Cryptographic signer verification: **NOT VERIFIED**
-- Android package ID, version code, version name, application label, min SDK, target SDK, and signer certificate: **NOT FOUND / NOT VERIFIED** in the current inspection environment.
+- Package ID, embedded version code/name, application label, min SDK, target SDK, and signer certificate: **NOT VERIFIED**.
 
-The local working copy is at `/mnt/data/TouchFlow-v1-baseline.apk` in the current work session. The binary has **not** been uploaded to this GitHub branch or attached to a GitHub Release yet.
+The original upload remains available at `/mnt/data/GrandmaConnect-preview.apk`. The working copy was created and its SHA-256 was rechecked. The binary has not yet been committed to GitHub or attached to a GitHub Release.
+
+The name `v1.0.0-baseline` is an internal project designation for the first supplied APK; it does not assert the APK's embedded version or release readiness.
 
 ## Existing source archive
 
-The default branch currently contains `GrandmaConnectNative-source.zip` (24,642 bytes; Git blob SHA `281e58f37b7d336682da95e6df790ccdf6a8ac8e`). This is a Git blob identifier, not a SHA-256 file checksum.
+The default branch contains `GrandmaConnectNative-source.zip` (24,642 bytes; Git blob SHA `281e58f37b7d336682da95e6df790ccdf6a8ac8e`). This is a Git blob ID, not a SHA-256 file checksum.
 
-The archive is a candidate source input only. Its contents have not yet been compared with the APK, and no claim is made that it produced this exact binary. Do not delete or replace it until it has been extracted, inspected, built, and compared against the baseline's package identity and behavior.
+The archive is only a candidate source input. It has not yet been extracted and compared with the owner-provided APK. Do not remove or replace it until it has been inspected, built, and compared.
 
-## Conditions before calling this a published v1.0.0
+## Requirements before a verified v1.0.0 release
 
 1. Extract and inspect the native source project.
-2. Read the binary manifest and verify package ID, app label, version values, SDK levels, and signer details.
-3. Build a clean APK from the candidate source.
-4. Compare the rebuilt APK's identity and key behavior with the baseline; a byte-for-byte match is not assumed because build outputs can be non-reproducible.
+2. Verify the APK's package ID, label, embedded version values, SDK levels, and signer certificate.
+3. Build an APK from the selected source on a clean runner.
+4. Compare its package identity and behavior with the baseline; do not assume byte-for-byte reproducibility.
 5. Run installation and regression checks on the target device.
-6. Store the APK as an immutable, versioned release asset with SHA-256 and source commit/run references.
+6. Publish a new immutable, versioned APK with SHA-256, source commit, build run, and release notes.
 
-Until these checks pass, this is the **initial baseline artifact**, not a verified production release.
+Until then this is the **initial baseline artifact**, not a verified production release.
