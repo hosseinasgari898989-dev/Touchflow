@@ -2,26 +2,31 @@
 
 TouchFlow is an Android application for recording and replaying touch interactions for personal accessibility workflows and controlled UI testing.
 
-## Project status
+## Baseline
 
-The project is being re-established around a preserved APK baseline. The first owner-provided binary is recorded in [docs/BASELINE.md](docs/BASELINE.md). It is a reference artifact, not editable source code.
+The first owner-provided APK is preserved as `TouchFlow-v1.0.0-baseline.apk`. Its embedded version is `0.1.0-alpha-preview`; v1.0.0-baseline is an internal project label. See [docs/BASELINE.md](docs/BASELINE.md).
 
-The repository still contains legacy Grandma Connect naming and experimental branches. They are being reviewed individually; they are not being merged or deleted as part of this baseline setup.
+A high-confidence source match has been identified from the expanded-capture source snapshot (commit `36b67597a86a84c093cc9c50ec2e32af6e4dbad8`). Its compiled DEX and manifest match the baseline; the resource table differs by 8 bytes. The source and build evidence are recorded in [docs/INITIAL_AUDIT.md](docs/INITIAL_AUDIT.md).
 
-## Source and build
+## Important update limitation
 
-- The existing native source archive is `GrandmaConnectNative-source.zip`.
-- The current default-branch workflow, `.github/workflows/build-android.yml`, builds a **debug APK** from that archive. It is a test-build workflow, not yet a versioned release pipeline.
-- The source archive has not yet been proven to produce the owner-provided baseline APK. See [docs/BASELINE.md](docs/BASELINE.md).
+The baseline app ID is `com.grandmaconnect.preview`. The baseline signing certificate is different from the certificate of the current CI build. A direct in-place update is blocked until the original signing key is recovered or an explicit separate-install/data-migration plan is completed. Do not install a new build over the existing app until this is resolved.
 
-An APK is a compiled output. Make changes in the Android source project, then build and verify a new APK. Do not try to edit or overwrite the binary APK as if it were source code.
+## Current implementation limits
 
-## Change and backup rules
+- Recording captures touches only inside the app's own canvas; global recording across other apps is not implemented.
+- Playback uses Android AccessibilityService gesture dispatch.
+- Macros are kept in app-private JSON files; there is no user-facing export/import yet.
+- The Accessibility service does not request access to other apps' window content.
+- The extended recording feature remains subject to a 10-minute app-level hard limit.
+- Timeline/keyframe WebView work remains a prototype and is not part of the selected baseline source.
 
-1. Keep `main` and the existing native-baseline backup unchanged during the cleanup.
-2. Make each change on a dedicated feature branch and review it through a pull request.
-3. Before changing or removing source files, record the exact paths, reason, dependency impact, and rollback point.
-4. Preserve each released APK as an immutable, versioned artifact with a SHA-256 checksum.
-5. Do not merge experimental branches together without a separate diff and regression review.
+## Development and release rules
 
-See [docs/RELEASE_POLICY.md](docs/RELEASE_POLICY.md) for the update and release procedure.
+- Keep the baseline APK and source commit immutable.
+- Use timestamped backup branches and focused pull requests.
+- Preserve package/app identity and signing continuity for upgrades.
+- Export/import and restore-test macro data before schema or package migration.
+- Publish every APK as a new immutable version with SHA-256, source commit, workflow run and test evidence.
+
+See [docs/RELEASE_POLICY.md](docs/RELEASE_POLICY.md) and [docs/CLEANUP-PLAN.md](docs/CLEANUP-PLAN.md).
