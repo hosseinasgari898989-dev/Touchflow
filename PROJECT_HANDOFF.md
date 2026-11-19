@@ -394,3 +394,17 @@ Local final verification immediately before transfer:
 - 6 Android XML files parsed successfully.
 - Android/Gradle local build: NOT RUN (toolchain absent).
 - Device test: NOT RUN.
+
+
+### 2026-11-19 — تأیید مستقل آرشیو پس از انتقال GitHub
+Status: DONE (integrity check); IN PROGRESS (Android CI pending)
+- هر ۹ فایل `.touchflow-feature/part-00` تا `part-08` مستقیماً از GitHub خوانده شدند.
+- طول قطعات: `4200, 4200, 4200, 4200, 4200, 4200, 4200, 4200, 236` کاراکتر.
+- طول Base64 ترکیب‌شده: 33,836 کاراکتر.
+- پس از Base64 decode: 25,376 bytes.
+- SHA-256 محاسبه‌شده از بایت‌های آرشیو: `8288df571300bccf54489bbb82289991d3b2a1a59a2ca4014b3859055ded8532`.
+- نتیجه: MATCH با SHA-256 محلی؛ تمامیت آرشیو انتقال‌یافته تأیید شد.
+- اصلاح: `part-05` و `part-07` هر دو به طول کامل 4,200 کاراکتر تصحیح شدند؛ هیچ padding یا دادهٔ حدسی اضافه نشده است.
+- GitHub blob نهایی `part-05`: `00329522e7c4bb5b38a8106e7b74321e8e84a706`.
+- GitHub blob نهایی `part-07`: `ca5e5385d988b52dcb31598b59fb33d06d434c14`.
+- اکنون می‌توان READY و workflow را اضافه کرد و CI را اجرا کرد.
