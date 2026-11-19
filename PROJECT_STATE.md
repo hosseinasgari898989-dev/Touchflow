@@ -158,3 +158,17 @@ Update after every material decision, branch, PR, commit, test or failure. Mark 
 - Workflow was then narrowed so the only push path trigger is `TouchFlow-R1-source.tar.xz`; no manual dispatch trigger is configured. The current workflow file last changed in commit `0b3d48f7fefd34dd25af8e9b26f23d881cd72218`.
 - Current R1 branch head after recording this state: pending this documentation commit. Main remains `6c738c2214d4244913fe449ed6172db613f844bd`; no main or backup write was made.
 - Next and only owner action: upload the exact local archive `TouchFlow-R1-source.tar.xz` to the root of the R1 branch. Verify GitHub reports the upload committed to `feature/touchflow-r1-recording-actions-2026-11-20`. That push will start a fresh CI run.
+
+
+## R1 CI failure diagnosis and test-fixture correction — 2026-11-20
+
+- Owner reported the R1 workflow result as unsuccessful. Inspected exact GitHub Actions run [44641075931](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44641075931), head commit `4438888b8ac72297b9b7a248a08d249d30de78f4`.
+- Archive verification and extraction succeeded. JDK17, Gradle8.9 and Android SDK35 setup succeeded. Main and test Kotlin sources compiled sufficiently to execute JUnit; compiler emitted only deprecation warnings for `SOFT_INPUT_ADJUST_RESIZE`.
+- JUnit result: **24 tests completed, 1 failed**. Failing test: `SearchRulesTest > allTokensMustMatchAcrossFields`, line 30. Assertion used Persian token `چت` against app package token `org.telegram.chat`; production search rules do not translate Persian `چت` to English `chat`.
+- This is the same already-diagnosed inherited test-fixture issue from Step 1. Step 1's successful workflow corrected only this test fixture from `"چت تلگرام"` to `"chat تلگرام"`, leaving application source untouched. R1 archive contains the old fixture, so the R1 workflow needed to repeat that explicit test-only correction.
+- Confirmed the exact R1 archive on local runtime: SHA-256 `4e0e00918e0b3f172d02daa9262d1d2da3c130872583bcc726aabd5ac35e12d3`. Its `SearchRulesTest.kt` contains the expected old fixture. **The archive itself remains unchanged.**
+- Updated only `.github/workflows/build-touchflow-feature-pack.yml` in the R1 branch (commit `fffe19113724c2c85c909fd35bac302c253d3cff`) to patch the extracted test fixture after archive extraction, asserting exactly one replacement. Production Kotlin, Manifest, permissions, Schema 3 and source archive are not modified by this correction.
+- New CI run [44641623406](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44641623406) triggered by the workflow update; initial status queued. **Awaiting result — NOT VERIFIED yet.**
+- Run [44641075931] did not reach `assembleDebug`; APK was not produced by that run.
+- Main remains `6c738c2214d4244913fe449ed6172db613f844bd`; no writes targeted main or backup branches.
+- Next: inspect Run `44641623406` logs, confirm 24/24 JUnit and assembleDebug, then inspect APK signature/package/permission report. Only after CI passes should owner install and execute the 18-item R1 device checklist. R1 is not yet device-verified.
