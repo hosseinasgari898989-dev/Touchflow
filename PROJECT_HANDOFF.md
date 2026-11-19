@@ -250,7 +250,7 @@ Status: DONE (documentation entry)
 - ترتیب Splitها، Launch App و GO_BACK نباید با هم تداخل داده‌ای داشته باشند؛ split marker صرفاً UI segmentation است و در زمان playback روی ترتیب event/action اثر ندارد.
 - Widget با AppWidgetProvider + Activity پیکربندی ساخته می‌شود؛ widgetId به macroId متصل می‌شود و کلیک به BroadcastReceiver می‌رود.
 - برای شروع موفق از Widget، سرویس singleton موجود استفاده می‌شود؛ در نبود سرویس یا مجوز اعلان، widget به‌تنهایی playback را آغاز نمی‌کند و به‌جای fail silently پیام/مسیر بازیابی می‌دهد.
-- فونت انتخابی اولیه: Noto Sans Arabic (فونت فارسی/عربی)، محلی و با مجوز SIL Open Font License 1.1؛ نسخه Regular و SemiBold در APK بسته‌بندی می‌شوند. اگر آزمون شکل‌دهی فارسی روی دستگاه هدف ایراد نشان دهد، پیش از انتشار تعویض می‌شود.
+- فونت این نسخه: `sans-serif` داخلی Android با fallback فارسی/عربی سیستم؛ هیچ فونت خارجی هنگام اجرا بارگیری نمی‌شود و APK با فونت بسته‌بندی‌شده سنگین‌تر نشده است. خوانایی و شکل‌دهی فارسی روی Galaxy A14 هنوز NOT VERIFIED است.
 
 ## برنامهٔ اجرا و آزمون
 
@@ -349,3 +349,20 @@ Next:
 3. افزودن workflow مختص شاخهٔ feature و اجرای `testDebugUnitTest assembleDebug`.
 4. بازبینی Diff/Build و به‌روزرسانی همین فایل با نتیجهٔ واقعی CI.
 5. تست دستی Widget و playback چندبرنامه‌ای روی دستگاه هدف قبل از ادغام.
+
+
+### 2026-11-19 — اعتبارسنجی منطق Split و بسته‌بندی سورس
+Status: IN PROGRESS (آمادهٔ CI؛ Build Android هنوز منتظر نتیجهٔ GitHub Actions)
+Branch: `feature/touchflow-first-feature-pack-2026-11-19`
+Source archive: `TouchFlowFeaturePack-source.tar.xz`
+Archive SHA-256: `8d58869b335a593aff7b4f361858bf3a9294ad43f1a039ea7f77404f808d6e0c`
+Archive size: 25,088 bytes
+Base64 segments: 14 × up to 2,400 characters
+Local checks:
+- `MacroSplitRulesTest: 10 assertions passed`
+- تمام XMLهای Android با XML parser خوانده شدند.
+- Build محلی هنوز اجرا نشده؛ Android SDK/Gradle در محیط موجود نیست.
+- سورس شامل Widget، config Activity، editor timeline، action درج برنامه حین ضبط، GO_BACK، Schema 3 و JUnit test است.
+- Preview build باید package id جداگانهٔ `com.grandmaconnect.feature` داشته باشد؛ APK baseline نباید جایگزین شود.
+
+**قانون تداوم:** اگر چت قطع شد، از همین فایل و همین شاخه ادامه بده؛ ابتدا نتیجهٔ آخرین Actions run را بررسی کن، نه اینکه از ابتدا پیاده‌سازی را شروع کنی.
