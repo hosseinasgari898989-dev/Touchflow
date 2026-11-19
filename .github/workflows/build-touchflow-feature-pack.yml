@@ -26,7 +26,7 @@ jobs:
           grep -Fx 'name=TouchFlowFeaturePack-source.tar.xz' .touchflow-feature/READY
           grep -Fx 'sha256=117becdf5b48a585303c1a9cc4d2648038795abdcada00639f2c4b5a7989a4d0' .touchflow-feature/READY
           grep -Fx 'parts=9' .touchflow-feature/READY
-          grep -Fx 'patch=startup-crash-fix.patch' .touchflow-feature/READY
+          grep -Fx 'patch=startup-crash-fix.py' .touchflow-feature/READY
           test "$(find .touchflow-feature -maxdepth 1 -type f -name 'part-*' | wc -l)" -eq 9
           cat .touchflow-feature/part-* > /tmp/TouchFlowFeaturePack-source.tar.xz.b64
           test "$(wc -c < /tmp/TouchFlowFeaturePack-source.tar.xz.b64)" -eq 33848
@@ -46,11 +46,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          patch --batch --forward --fuzz=0 -p1 -d /tmp/touchflow-source < .touchflow-feature/startup-crash-fix.patch
           ACTIVITY=/tmp/touchflow-source/GrandmaConnectNative/app/src/main/java/com/grandmaconnect/MainActivity.kt
           test -f "$ACTIVITY"
-          ! sed -n '43,46p' "$ACTIVITY" | grep -F 'setNormalSystemBars()'
-          ! sed -n '111,116p' "$ACTIVITY" | grep -F 'setNormalSystemBars()'
+          python3 .touchflow-feature/startup-crash-fix.py "$ACTIVITY"
           grep -n -B1 -A1 'setNormalSystemBars()' "$ACTIVITY"
           tar -cJf /tmp/TouchFlowFeaturePack-source-startup-fix.tar.xz -C /tmp/touchflow-source GrandmaConnectNative
           sha256sum /tmp/TouchFlowFeaturePack-source-startup-fix.tar.xz
