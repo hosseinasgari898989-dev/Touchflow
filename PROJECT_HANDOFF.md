@@ -586,3 +586,30 @@ Status: IN PROGRESS
 2. run موفق `44602552416` و artifactها را دوباره اجرا نکن؛ نتیجه در همین فایل ثبت شده است.
 3. ادامه را با تست فیزیکی APK روی Galaxy A14 شروع کن. APK را می‌توان از Artifact لینک بالا گرفت؛ نصب باید کنار baseline باقی بماند، چون package آن `com.grandmaconnect.feature` است.
 4. بعد از دریافت نتایج دستگاه، موارد را ثبت کن و فقط سپس وارد اصلاح اسناد، scope review و PR شو.
+
+
+### 2026-11-19 — بازبینی ایستای سورس Build‌شده (بدون تغییر کد)
+
+سورس بررسی‌شده از artifact واقعی همان Run استخراج شد؛ این بررسی static است و جای تست دستگاه را نمی‌گیرد.
+
+**رفتار و حریم خصوصی**
+- Manifest فقط `POST_NOTIFICATIONS` را درخواست می‌کند؛ مجوز `INTERNET` در Manifest وجود ندارد.
+- Accessibility config مقدار `canRetrieveWindowContent=false` دارد و فقط `typeWindowStateChanged` را subscribe می‌کند؛ پیاده‌سازی `onAccessibilityEvent` عمداً محتوای event یا پنجره را نمی‌خواند/ذخیره نمی‌کند.
+- فهرست برنامه‌ها از Launcher Activityها و با Package visibility محدود به intent مربوط ساخته می‌شود؛ `QUERY_ALL_PACKAGES` درخواست نشده است.
+- ضبط `TouchCanvasView` فقط `MotionEvent`هایی را می‌گیرد که روی خود View/بوم TouchFlow رخ می‌دهند. این نسخه لمس واقعی داخل برنامهٔ ثالث را هنگام مرحلهٔ ضبط capture نمی‌کند.
+- در زمان playback، سرویس Accessibility ژست‌های از پیش ذخیره‌شده را dispatch می‌کند و اقدام‌های Launch App / Home / Back را در مرز گروه‌ها اجرا می‌کند. تأیید اینکه برنامهٔ مقصد واقعاً در foreground قرار گرفته وجود ندارد؛ صرفاً مکث انتخاب‌شده رعایت می‌شود. این محدودیت در README فعلی نیز ذکر شده است.
+- توقف از اعلان cooperative است: ژست لمسی در حال اجرا ممکن است کامل شود و سپس از اجرای گام‌های بعدی جلوگیری می‌شود؛ متن اعلان همین را توضیح می‌دهد.
+
+**مدل داده و UI**
+- کد `MacroModels.kt` از Schema 1 و 2 می‌خواند و Schema 3 را ذخیره می‌کند؛ actionهای `LAUNCH_APP`, `GO_HOME`, `GO_BACK` و Split markers در مدل فعلی وجود دارند.
+- کنترل Split/Unsplit در `MainActivity.showMacroTimeline` فقط در مرز میان گروه‌های کامل عرضه می‌شود؛ منطق اعتبارسنجی در `MacroSplitRules` قرار دارد.
+- درج Launch App هنگام ضبط با بررسی `canInsertFlowAction()` و ثابت‌ماندن تعداد گروه‌های کامل حین انتخاب برنامه محافظت می‌شود.
+- UI فعلی native و programmatic است: محتوای ScrollView، جهت RTL، padding جانبی 16dp، رعایت system-bar insets و دکمه با حداقل ارتفاع 50dp. عرض content به max-width محدود نشده و فونت اختصاصی embed نشده؛ system sans-serif/fallback فارسی Android استفاده می‌شود.
+- چون ظاهر واقعی، اندازه متن و insets روی خود A14 هنوز بررسی نشده، ادعای سازگاری بصری کامل نداریم. اندازه‌های 320/360/390/412dp نیز هنوز تست نشده‌اند.
+
+**یافته‌های بازبینی**
+- `README-fa.md` و `TEST-CHECKLIST-fa.md` متعلق به baseline ساده‌ترند و با Schema 3، GO_BACK، Split و Widget جدید هماهنگ نیستند؛ نیازمند به‌روزرسانی هستند.
+- چک‌لیست فعلی موارد UI/Widget/دادهٔ Split را به‌طور کامل پوشش نمی‌دهد؛ باید یک چک‌لیست feature-pack جدا یا نسخهٔ به‌روز تهیه شود.
+- این بازبینی کد را تغییر نداده؛ artifact و APK همچنان دقیقاً خروجی Run موفق `44602552416` هستند.
+
+**نتیجهٔ عملی:** این APK برای نصب و آزمایش محدود روی گوشی آماده است، اما هنوز محصول نهایی و ضبط‌کنندهٔ عمومی لمس‌های برنامه‌های دیگر نیست.
