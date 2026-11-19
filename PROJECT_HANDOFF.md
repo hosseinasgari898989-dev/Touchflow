@@ -684,3 +684,63 @@ Source commit used by CI: `8f4092e077eaa82c196d6b8403201b3ed3df72a8`
 - No Build was rerun; no PR or merge was created.
 - Next: obtain a bug report/Logcat from the device immediately after reproducing the crash. The required evidence is the complete `FATAL EXCEPTION` block, its `Caused by` chain, and the first app stack frames. Diagnose only after that evidence is available.
 - Until the real-device launch succeeds, all feature testing remains BLOCKED.
+
+### 2026-11-19 — تشخیص قطعی Crash و اصلاح حداقلی Startup
+Status: IN PROGRESS (اصلاح آمادهٔ CI؛ تست اجرای APK جدید روی گوشی هنوز NOT VERIFIED)
+Branch: `feature/touchflow-feature-pack-bundle-fix-2026-11-19`
+Pre-fix backup branch: `backup/touchflow-before-startup-crash-fix-2026-11-19`
+Pre-fix feature head at backup creation: `54a18eb52c825c5b3967fb6abbed4c8b9cc6664d`
+Original source commit used by failed APK: `8f4092e077eaa82c196d6b8403201b3ed3df72a8`
+
+**Bugreport evidence**
+- User supplied Android bug report ZIP: `bugreport-zahedan-AP3A.241105.008-2026-11-19-23-43-17.zip`.
+- ZIP SHA-256: `b3039d6bef45f5b82d0ead845abceb63b548ceffc0ef85dc2cc1de179879bc47`.
+- 31 `FATAL EXCEPTION: main` records for `com.grandmaconnect.feature` were found; repeated launches have the same failure.
+- Representative event: `2026-11-19 23:27:07.678`.
+- Stack trace:
+  ```
+  FATAL EXCEPTION: main
+  Process: com.grandmaconnect.feature
+  Caused by: java.lang.NullPointerException: Attempt to invoke virtual method
+    'android.view.WindowInsetsController com.android.internal.policy.DecorView.getWindowInsetsController()'
+    on a null object reference
+    at com.android.internal.policy.PhoneWindow.getInsetsController(PhoneWindow.java:4096)
+    at com.grandmaconnect.MainActivity.setNormalSystemBars(MainActivity.kt:650)
+    at com.grandmaconnect.MainActivity.onCreate(MainActivity.kt:45)
+  ```
+- This is a confirmed runtime failure from the exact target package, not a CI/compiler error.
+
+**Root cause**
+- Original `MainActivity.onCreate()` called `setNormalSystemBars()` before any `setContentView()`.
+- The original `showHome()` also called `setNormalSystemBars()` at its beginning, before constructing and installing its content view.
+- At that point the `PhoneWindow` has no initialized DecorView; accessing `window.insetsController` invokes `PhoneWindow.getInsetsController()` and throws before the Kotlin safe-call can be evaluated.
+- The failing first call is the one in `onCreate`; the second premature call in `showHome` would have remained a crash if only the first call were removed.
+
+**Minimal correction**
+- Only application source file changed: `GrandmaConnectNative/app/src/main/java/com/grandmaconnect/MainActivity.kt`.
+- Remove the early `setNormalSystemBars()` call from `onCreate()`.
+- Remove the early call at the beginning of `showHome()`.
+- Call `setNormalSystemBars()` immediately after `setContentView(scrollable(page))` in `showHome()`, once the content view/DecorView exists.
+- Other system-bar restoration calls in recording/navigation flows are preserved.
+- No Manifest, theme, resource, macro model, storage, widget, accessibility, package, or baseline file is intentionally changed.
+- Deterministic source transformer: `.touchflow-feature/startup-crash-fix.py`; it asserts each expected source fragment occurs exactly once and verifies both startup call-order conditions before writing.
+
+**Validation performed before CI**
+- The transformer was run against an extraction of the exact original source archive; it completed successfully.
+- Resulting startup order: `onCreate -> showHome`; and inside `showHome`, `setContentView` precedes `setNormalSystemBars`.
+- Pure Kotlin regression test rerun:
+  `kotlinc app/src/main/java/com/grandmaconnect/MacroSplitRules.kt tools/MacroSplitRulesTest.kt -include-runtime -d /tmp/tf-macro-split-test.jar && java -jar /tmp/tf-macro-split-test.jar`
+  Result: `MacroSplitRulesTest: 10 assertions passed`.
+- This standalone test does not establish Android runtime startup success. Android Gradle Build and physical device validation are still pending.
+
+**CI workflow adjustment**
+- `.github/workflows/build-touchflow-feature-pack.yml` now verifies the unchanged input archive SHA `117becdf5b48a585303c1a9cc4d2648038795abdcada00639f2c4b5a7989a4d0`, extracts it, applies the deterministic transformer, creates a patched source archive, then runs `testDebugUnitTest assembleDebug`.
+- The uploaded source artifact is the patched extracted source archive, not the unpatched input archive. Its computed SHA-256 is printed in the workflow log.
+- Workflow's only trigger remains a change to `.touchflow-feature/READY`; the trigger marker will be updated after the helper/workflow/handoff files are committed and read back.
+- New CI run and APK artifact: NOT CREATED YET.
+
+**Safety and remaining work**
+- Backup branch was created before any application-source modification. `main` and the original baseline APK/source remain untouched.
+- No PR or merge created.
+- No Android runtime/device is attached to this coding environment; new APK must still be launched on the target phone.
+- Next: update READY to trigger one CI run; inspect source patch step, JUnit, Build, APK identity/signature and artifacts; then have owner launch only the new `com.grandmaconnect.feature` APK and confirm the home screen opens. Do not resume feature development before that real-device check.
