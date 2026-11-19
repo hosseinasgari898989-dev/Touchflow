@@ -95,3 +95,16 @@ Update after every material decision, branch, PR, commit, test or failure. Mark 
 - Keep `Save on-device retest = NOT YET DONE` until the owner confirms it on the target Galaxy A14. Build success alone does not close this device test gate.
 
 - Immediate next step: upload `TouchFlow-Step1-source.tar.xz` (162,524 bytes) to the root of this branch; verify SHA-256 exactly equals `8811c815e01c415e48dde1f18a4b94e35d8c87bc6c106b6e2462d6ddb623f30c`; then move `docs/ci/build-touchflow-step1.yml.pending` into `.github/workflows/build-touchflow-step1.yml` and push only this branch.
+
+
+## Step 1 latest CI update — 2026-11-20
+
+- Owner uploaded `TouchFlow-Step1-source.tar.xz` to branch root.
+- GitHub file blob SHA: `e9f41d4e39d2a4dffe9481b9a0d8cffb4b17c06a`.
+- Verified GitHub file bytes: 162,524 bytes; SHA-256 `8811c815e01c415e48dde1f18a4b94e35d8c87bc6c106b6e2462d6ddb623f30c` — exact match.
+- Active workflow: `.github/workflows/build-touchflow-step1.yml`; old feature-pack workflow untouched.
+- CI Run 1: [44633139815](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44633139815), commit `2a638f4f027eb7609a0ce8c044469468564e4aa1`, job `135944746691`.
+- Last observed job state: `in_progress`. Archive hash, extraction, source listing, JDK17 setup succeeded. Gradle 8.9 setup was in progress; SDK/JUnit/assert/assemble/verify still pending. No result/artifact available at that observation.
+- Overall CI status: **PENDING — NOT VERIFIED**. Do not say Build/test passed until run conclusion and logs are inspected.
+- Main remains `6c738c2214d4244913fe449ed6172db613f844bd`; backup baseline remains `d62899f0eb586a870471648fd3d77d4b8f50fb8d`; PR #4 Open / Unmerged. Continue only on the Step 1 feature branch.
+- For full evidence, read `PROJECT_HANDOFF.md` section 12.7.
