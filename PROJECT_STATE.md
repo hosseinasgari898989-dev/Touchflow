@@ -136,3 +136,16 @@ Update after every material decision, branch, PR, commit, test or failure. Mark 
 - Do not install this APK as an update to `com.grandmaconnect.preview`; it is a separate debug package. Do not attempt updating an older `.feature` installation without matching its signer.
 - Step 2 (macro editor) has NOT started; obtain scope/acceptance before beginning.
 - Full evidence: `PROJECT_HANDOFF.md` sections 12.8–12.10.
+
+
+## R1 branch staging — 2026-11-20
+
+- Owner supplied `TouchFlow-R1-source.tar.xz`; local file SHA-256 verified as `4e0e00918e0b3f172d02daa9262d1d2da3c130872583bcc726aabd5ac35e12d3`.
+- Created isolated branch `feature/touchflow-r1-recording-actions-2026-11-20` from `feature/step1-build-bootstrap-2026-11-20` at the Step 1 line (branch head at creation: `07474eb75c0cbb98ff3eb7b7b1fcb9c595ea7a5d`). Step 1 successful evidence remains Run `44633470736`.
+- Updated `.github/workflows/build-touchflow-feature-pack.yml` on the R1 branch. It is scoped to the R1 branch and triggers only when `TouchFlow-R1-source.tar.xz` is pushed; manual `workflow_dispatch` was omitted.
+- Workflow checks the exact R1 archive SHA, runs Gradle JUnit and requires exactly 24 tests with zero failures/errors/skips, runs `assembleDebug`, verifies package `com.grandmaconnect.feature`, label `TouchFlow`, APK signature, exact permission allowlist (`POST_NOTIFICATIONS`), and `canRetrieveWindowContent=false`; it uploads the APK and reports.
+- **BLOCKER:** the R1 binary archive is verified in the assistant runtime but has NOT yet been committed to the GitHub branch. The available GitHub connector supports text writes but does not provide a direct local-file binary upload interface. The workflow must not be treated as run until the owner uploads the exact archive to the root of the R1 branch.
+- Workflow file currently committed at commit `0b3d48f7fefd34dd25af8e9b26f23d881cd72218`. No source archive or application source was changed by that commit.
+- Main was read at `6c738c2214d4244913fe449ed6172db613f844bd` before this work; no write operation targeted `main`. Backup branches were not targeted.
+- R1 status: source archive hash verified locally; branch created; CI workflow staged; **archive upload pending; R1 Build NOT RUN; R1 JUnit NOT RUN; device NOT VERIFIED**.
+- Next owner action: upload the already-provided `TouchFlow-R1-source.tar.xz` unchanged to the repository root on branch `feature/touchflow-r1-recording-actions-2026-11-20`. This single push triggers the R1 CI. Then inspect the run and its artifact before installing or accepting on device.
