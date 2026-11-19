@@ -895,3 +895,63 @@ Result: `completed / success`
 - Next device test only: replace prior Feature Preview if Android reports signature conflict; install this APK; record 2–3 taps; stop; confirm Save Macro is enabled; save; confirm the macro appears in the list. Do not move to macro management details or widget playback until this passes.
 - Baseline/other app is untouched. No PR or merge created.
 - The absence of a Full Screen settings toggle and the difference between immersive in-app capture versus cross-app/device-wide touch capture remain separate scope decisions; no changes to those behaviors were made in this patch.
+
+### 2026-11-20 — تأیید دامنه Full-Screen و نیازمندی‌های نسخه نهایی
+Status: REQUIREMENTS CLARIFIED — NO PRODUCT CODE CHANGED
+Latest confirmed save-fix APK:
+- Workflow: `44619393523`
+- APK artifact: `14576832194`
+- Extracted APK SHA-256: `07d08a832dc4bbdbe42e15dd8bb81217c17de17d33a263229f1f0f46316a3196`
+- Save fix is built; owner has not yet confirmed physical retest of the Save button.
+
+**Owner clarification**
+- “Full Screen” means recording touch input across the full device display while other applications are in the foreground, not merely hiding Android status/navigation bars and not video/screen capture.
+- The macro widget must ask the user which saved macro to execute on every widget tap. It must not silently execute a macro permanently bound during widget creation.
+- A searchable app picker is required when inserting a Launch App action.
+- Desired control/action concepts include Stop/Pause/Resume, Back, Home, Recents, app launch, and system connectivity actions; these must be separated into runtime controls versus ordered macro actions.
+- Desired final product is a complete native app: polished UI, functional recording/playback, macro library/editor, settings, searchable app selection, and configurable widget flow. MagicPath is a visual reference only, not a runtime dependency.
+
+**Verified source inventory from source artifact 14575158079**
+- Native Android project uses Kotlin `Activity` / classic Android Views; no Jetpack Compose dependency exists in the current Gradle file.
+- MainActivity implements Home, Tools, Macro Management, Macro Timeline split markers, macro action editor, capture settings, and recorder UI.
+- TouchCanvasView receives `MotionEvent`s from its own View only; supports tap/swipe/long-press timing, multi-pointer gesture groups, normalized coordinates, sampled points and quality profiles.
+- Macro data is locally stored as app-private JSON files under `filesDir/macros`; schema version 3 supports gesture groups, actions and split marker counts. Saving, loading, deletion, validation exist.
+- Current capture settings include extended capacity, 45-second default mode or configured 2/5/10-minute modes, and Economy/Balanced/Precise sampling quality.
+- Current macro actions are exactly `LAUNCH_APP`, `GO_HOME`, `GO_BACK`, with placement after a gesture-group boundary and waitAfterMs. An app picker exists but uses a plain non-searchable AlertDialog.
+- Current MacroAccessibilityService replays gestures via `dispatchGesture`, checks orientation compatibility, runs saved app/home/back actions at boundaries, and publishes an ongoing notification with a Stop action. It has no Pause/Resume playback controls.
+- Current widget binds one macro ID during widget setup; it asks which macro only during creation/configuration and runs the same macro directly on later taps.
+- Current Timeline editor adds/removes display split markers only; it does not edit raw paths, timing, points or reorder gesture groups.
+- Current `onAccessibilityEvent()` is intentionally empty, `canRetrieveWindowContent=false`, and no other-app window text/content is collected.
+- Current source has no macro search, no searchable app chooser, no import/export UI, no duplicate/rename macro UI, no true gesture editor, no pause/resume capture, no recents action, no direct network toggle, and no per-tap widget macro chooser.
+
+**Full-display touch capture — official API lead; not yet prototyped**
+- Target device remains Samsung Galaxy A14 / Android 13 (API 33).
+- Android official `TouchInteractionController` was introduced in API 33. It can deliver framework touch MotionEvents to an AccessibilityService while the controller is in `STATE_TOUCH_INTERACTING`.
+- Receiving these events requires `AccessibilityServiceInfo.FLAG_REQUEST_TOUCH_EXPLORATION_MODE` and service metadata `canRequestTouchExplorationMode=true`. The controller's event routing is stateful: when interaction is classified as touch exploration or delegated, events stop being sent to the service for the remainder of that interaction; `requestDelegating()` passes events to the normal input pipeline but the service then stops receiving that interaction's remaining events.
+- Therefore this API is a promising Android 13 prototype path, not proof of a transparent full-screen recorder. Any implementation must prove that target-app touches still behave correctly, including taps, long presses, swipes, multi-touch, edge/system gestures, keyboard use, rotation and other enabled accessibility services. Do not enable touch exploration globally in production before successful real-device tests and a user-facing opt-in warning.
+- `AccessibilityService.onMotionEvent()` / `AccessibilityServiceInfo.setMotionEventSources()` are API 34; they are NOT the initial path for the Android 13 / API 33 target device.
+- Do not substitute MediaProjection video capture, a View overlay recorder, or the existing TouchCanvasView for full-screen touch input capture. Do not use root, shell/ADB, hidden/private APIs or privileged permissions as a normal-app shortcut. If the API 33 prototype cannot both capture and preserve ordinary app input, report the exact limitation instead of claiming success.
+
+**Global navigation and connectivity constraints**
+- Official `AccessibilityService.performGlobalAction()` supports Back, Home and Recents global actions (subject to runtime availability; check `getSystemActions()` and return value).
+- There is no universal ordinary-app “force close another app” action. `finishAndRemoveTask()` only applies to TouchFlow's own task. “Exit current app” must be represented by appropriate Back/Home/Recents semantics, not a false force-stop promise.
+- Android 10+ apps targeting API 29+ cannot directly toggle Wi-Fi using `WifiManager.setWifiEnabled()`; Android directs apps to a Settings Panel. Use `Settings.Panel.ACTION_INTERNET_CONNECTIVITY` / `ACTION_WIFI` to open the system panel and let the user choose. Do not claim TouchFlow can silently toggle mobile data/Wi-Fi or airplane mode via public third-party APIs.
+- Internet/network setting should be modeled as an explicit “Open Internet settings panel” action, with a clear note that the user performs the switch in system UI.
+
+**Required widget behavior**
+- Every tap on any TouchFlow widget instance opens a macro chooser showing current saved macros, with search if feasible; user chooses which macro to run for that tap.
+- No persistent macro ID binding as the default execution path; missing/deleted macros, empty library, no accessibility service, and missing notification permission need explicit recoverable UI.
+- Widget creation and widget invocation are separate flows. A configuration selection must not substitute for the per-tap question.
+
+**Required macro controls and editor**
+- Separate recording controls (Start, Pause Recording, Resume Recording, Finish/Stop Recording, Discard) from playback controls (Pause Playback, Resume Playback, Stop Playback/Emergency Stop).
+- Playback Stop is terminal; Pause/Resume must preserve exact next action/group/timing state and must not restart from the beginning.
+- Add ordered action types only when implemented and verified: launch selected app, Back, Home, Recents, terminal Stop Macro, and opening Internet/Wi-Fi system panel. The UI must distinguish action insertion point, delay, success/failure, and continuation behavior.
+- Macro library requirements: searchable and sortable list, detail view, rename, duplicate, delete with confirmation, metadata, safe import/export/backup if implemented.
+- Timeline/editor requirements: clearly distinguish current display-only split markers from actual editing. Plan path/group selection, reorder, duplicate, remove, adjust wait/delay/speed, split/merge, coordinate transforms, action insertion and undo/redo only with schema migration and tests.
+- App chooser requirements: searchable installed launchable apps by label; no broad package visibility permission unless independently justified. Search field must be present both when adding app actions during recording and when editing action steps.
+- Full Persian RTL UI should be responsive for the Galaxy A14 as well as smaller/larger screens, respect safe insets, keyboard and landscape where supported, and use real state/data rather than decorative mock controls.
+
+**No implementation authorization beyond this requirements handoff**
+- This entry records the scope and feasibility constraints only. No Android code, Manifest, settings, widget, main branch or baseline changed.
+- Preserve current rule: test the already-built save-fix APK on the target phone first; do not label Save fixed in runtime until the owner reports the result. Work after that gate must proceed in small, backed-up feature-branch phases with tests and device acceptance for each capability.
