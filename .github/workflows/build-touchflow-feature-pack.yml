@@ -1,69 +1,44 @@
-name: Build TouchFlow Feature Pack Preview
+name: Build TouchFlow R1 (JUnit + assembleDebug)
 
 on:
   push:
     branches:
-      - feature/touchflow-feature-pack-bundle-fix-2026-11-19
+      - 'feature/touchflow-r1-recording-actions-2026-11-20'
     paths:
-      - '.touchflow-feature/READY'
+      - 'TouchFlow-R1-source.tar.xz'
+      - '.github/workflows/build-touchflow-feature-pack.yml'
 
 permissions:
   contents: read
 
+env:
+  ARCHIVE: TouchFlow-R1-source.tar.xz
+  ARCHIVE_SHA256: 4e0e00918e0b3f172d02daa9262d1d2da3c130872583bcc726aabd5ac35e12d3
+  PROJECT_DIR: GrandmaConnectNative
+  EXPECTED_PACKAGE: com.grandmaconnect.feature
+  EXPECTED_LABEL: TouchFlow
+  EXPECTED_TESTS: '24'
+
 jobs:
-  build-touchflow-feature-pack:
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Assemble and verify native source archive
-        shell: bash
+      - name: Verify archive hash
         run: |
-          set -euo pipefail
-          test -s .touchflow-feature/READY
-          grep -Fx 'name=TouchFlowFeaturePack-source.tar.xz' .touchflow-feature/READY
-          grep -Fx 'sha256=117becdf5b48a585303c1a9cc4d2648038795abdcada00639f2c4b5a7989a4d0' .touchflow-feature/READY
-          grep -Fx 'parts=9' .touchflow-feature/READY
-          grep -Fx 'patch=startup-crash-fix.py' .touchflow-feature/READY
-          test "$(find .touchflow-feature -maxdepth 1 -type f -name 'part-*' | wc -l)" -eq 9
-          cat .touchflow-feature/part-* > /tmp/TouchFlowFeaturePack-source.tar.xz.b64
-          test "$(wc -c < /tmp/TouchFlowFeaturePack-source.tar.xz.b64)" -eq 33848
-          base64 --decode /tmp/TouchFlowFeaturePack-source.tar.xz.b64 > /tmp/TouchFlowFeaturePack-source.tar.xz
-          echo '117becdf5b48a585303c1a9cc4d2648038795abdcada00639f2c4b5a7989a4d0  /tmp/TouchFlowFeaturePack-source.tar.xz' | sha256sum -c -
-          tar -tJf /tmp/TouchFlowFeaturePack-source.tar.xz >/dev/null
-          mkdir -p /tmp/touchflow-source
-          tar -xJf /tmp/TouchFlowFeaturePack-source.tar.xz -C /tmp/touchflow-source
-          APP=/tmp/touchflow-source/GrandmaConnectNative/app
-          test -f "$APP/src/main/java/com/grandmaconnect/MainActivity.kt"
-          test -f "$APP/src/main/java/com/grandmaconnect/MacroWidget.kt"
-          test -f "$APP/src/main/java/com/grandmaconnect/MacroSplitRules.kt"
-          test -f "$APP/src/test/java/com/grandmaconnect/MacroSplitRulesTest.kt"
-          test -f "$APP/src/main/AndroidManifest.xml"
+          test -s "$ARCHIVE"
+          echo "$ARCHIVE_SHA256  $ARCHIVE" | sha256sum -c -
 
-      - name: Apply minimal startup crash fix
-        shell: bash
+      - name: Extract source (no source patching)
         run: |
-          set -euo pipefail
-          ACTIVITY=/tmp/touchflow-source/GrandmaConnectNative/app/src/main/java/com/grandmaconnect/MainActivity.kt
-          test -f "$ACTIVITY"
-          python3 .touchflow-feature/startup-crash-fix.py "$ACTIVITY"
-          grep -n -B1 -A1 'setNormalSystemBars()' "$ACTIVITY"
-          tar -cJf /tmp/TouchFlowFeaturePack-source-startup-fix.tar.xz -C /tmp/touchflow-source GrandmaConnectNative
-          sha256sum /tmp/TouchFlowFeaturePack-source-startup-fix.tar.xz
-
-      - name: Isolate preview app identity
-        shell: bash
-        run: |
-          set -euo pipefail
-          APP=/tmp/touchflow-source/GrandmaConnectNative/app
-          sed -i 's/applicationIdSuffix = ".debug"/applicationIdSuffix = ".feature"/' "$APP/build.gradle.kts"
-          sed -i 's/versionNameSuffix = "-debug"/versionNameSuffix = "-feature"/' "$APP/build.gradle.kts"
-          sed -i 's#<string name="app_name">TouchFlow</string>#<string name="app_name">TouchFlow Feature Preview</string>#' "$APP/src/main/res/values/strings.xml"
-          grep -F 'applicationIdSuffix = ".feature"' "$APP/build.gradle.kts"
-          grep -F 'versionNameSuffix = "-feature"' "$APP/build.gradle.kts"
-          grep -F '<string name="app_name">TouchFlow Feature Preview</string>' "$APP/src/main/res/values/strings.xml"
+          tar -xf "$ARCHIVE"
+          test -f "$PROJECT_DIR/settings.gradle.kts"
+          test -f "$PROJECT_DIR/app/src/main/AndroidManifest.xml"
+          echo "Test sources Gradle will see:"
+          find "$PROJECT_DIR/app/src/test" -name '*.kt' | sort
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -81,31 +56,84 @@ jobs:
         with:
           packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
 
-      - name: Run unit tests and build preview APK
-        run: gradle --no-daemon --stacktrace -p /tmp/touchflow-source/GrandmaConnectNative testDebugUnitTest assembleDebug
+      - name: JUnit
+        run: gradle --no-daemon --stacktrace -p "$PROJECT_DIR" testDebugUnitTest
 
-      - name: Verify APK package, label and signature
-        shell: bash
+      - name: Assert exact test count and zero failures
         run: |
-          set -euo pipefail
-          APK=/tmp/touchflow-source/GrandmaConnectNative/app/build/outputs/apk/debug/app-debug.apk
-          test -s "$APK"
-          $ANDROID_HOME/build-tools/35.0.0/aapt dump badging "$APK" | grep -F "package: name='com.grandmaconnect.feature'"
-          $ANDROID_HOME/build-tools/35.0.0/aapt dump badging "$APK" | grep -F "application-label:'TouchFlow Feature Preview'"
-          $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose "$APK"
+          python3 - <<'PY'
+          import glob, os, sys
+          import xml.etree.ElementTree as ET
+          root = os.environ["PROJECT_DIR"] + "/app/build/test-results/testDebugUnitTest/*.xml"
+          expected = int(os.environ["EXPECTED_TESTS"])
+          total = failed = errors = skipped = 0
+          lines = []
+          for path in sorted(glob.glob(root)):
+              suite = ET.parse(path).getroot()
+              t = int(suite.get("tests", 0)); f = int(suite.get("failures", 0))
+              e = int(suite.get("errors", 0)); s = int(suite.get("skipped", 0))
+              total += t; failed += f; errors += e; skipped += s
+              lines.append(f"{suite.get('name')}: tests={t} failures={f} errors={e} skipped={s}")
+          lines.append(f"TOTAL: tests={total} failures={failed} errors={errors} skipped={skipped} expected={expected}")
+          open("test-summary.txt", "w").write("\n".join(lines) + "\n")
+          print("\n".join(lines))
+          if total != expected or failed or errors or skipped:
+              sys.exit("Unexpected JUnit result (see test-summary.txt)")
+          PY
 
-      - name: Upload TouchFlow feature preview APK
+      - name: assembleDebug
+        run: gradle --no-daemon --stacktrace -p "$PROJECT_DIR" assembleDebug
+
+      - name: Verify package, label, signature, permissions
+        run: |
+          APK="$PROJECT_DIR/app/build/outputs/apk/debug/app-debug.apk"
+          BT="$ANDROID_HOME/build-tools/35.0.0"
+
+          "$BT/aapt2" dump badging "$APK" > badging.txt
+          head -5 badging.txt
+          grep -q "package: name='$EXPECTED_PACKAGE'" badging.txt
+          grep -q "application-label:'$EXPECTED_LABEL'" badging.txt
+
+          "$BT/apksigner" verify --verbose --print-certs "$APK" > signature.txt
+          cat signature.txt
+          grep -q '^Verifies' signature.txt
+
+          sha256sum "$APK" > apk.sha256
+          cat apk.sha256
+
+          grep -q 'canRetrieveWindowContent="false"' "$PROJECT_DIR/app/src/main/res/xml/accessibility_service_config.xml"
+
+          grep -E "^uses-(implied-)?permission" badging.txt > permissions-raw.txt || true
+          grep -oE "^uses-permission: name='[^']+'" badging.txt | sed -E "s/.*name='([^']+)'/\1/" | sort -u > permissions.txt || true
+          printf '%s\n' 'android.permission.POST_NOTIFICATIONS' | sort -u > permissions.allowlist
+
+          echo "--- permissions found ---"
+          cat permissions.txt
+          if ! diff -u permissions.allowlist permissions.txt; then
+            echo "::error::APK permissions differ from the allowlist"
+            exit 1
+          fi
+          if grep -q '^uses-implied-permission' permissions-raw.txt; then
+            echo "::error::Unexpected implied permission"
+            cat permissions-raw.txt
+            exit 1
+          fi
+
+      - name: Upload APK and reports
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: touchflow-feature-pack-preview-apk
-          path: /tmp/touchflow-source/GrandmaConnectNative/app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
-          retention-days: 30
-
-      - name: Upload exact source archive
-        uses: actions/upload-artifact@v4
-        with:
-          name: touchflow-feature-pack-source
-          path: /tmp/TouchFlowFeaturePack-source-startup-fix.tar.xz
-          if-no-files-found: error
+          name: touchflow-r1-build
+          path: |
+            ${{ env.PROJECT_DIR }}/app/build/outputs/apk/debug/app-debug.apk
+            ${{ env.PROJECT_DIR }}/app/build/reports/tests/testDebugUnitTest/
+            ${{ env.PROJECT_DIR }}/app/build/test-results/testDebugUnitTest/
+            test-summary.txt
+            badging.txt
+            signature.txt
+            apk.sha256
+            permissions.txt
+            permissions.allowlist
+            permissions-raw.txt
+          if-no-files-found: warn
           retention-days: 30
