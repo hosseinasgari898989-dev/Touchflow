@@ -484,3 +484,17 @@ Previous run result:
 - ویجت برای هر widgetId به macroId مشخص متصل می‌شود؛ اجرای موفق باید Activity را باز نگذارد و توقف از Notification ممکن باشد.
 - فونت اختصاصی هنوز اضافه نشده؛ این نسخه از `sans-serif` سیستم و fallback فارسی/عربی Android استفاده می‌کند. خوانایی روی گوشی تأیید نشده است.
 - نسخهٔ آزمایشی با package جدا ساخته می‌شود؛ هرگز APK مرجع یا نصب فعلی را overwrite نکن.
+
+
+### 2026-11-19 23:20 — اجرای CI اصلاح‌شده آغاز شد
+Status: IN PROGRESS
+- Latest branch HEAD: `8f4092e077eaa82c196d6b8403201b3ed3df72a8`.
+- READY اکنون SHA اصلاح‌شده `117becdf5b48a585303c1a9cc4d2648038795abdcada00639f2c4b5a7989a4d0` را دارد.
+- Workflow run: [44602552416](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44602552416).
+- Run head SHA: `8f4092e077eaa82c196d6b8403201b3ed3df72a8`.
+- Archive verification: SUCCESS (including sha256sum, tar list/extract and required source file checks).
+- Preview identity isolation: SUCCESS.
+- JDK 17: SUCCESS.
+- در آخرین بررسی Gradle 8.9 در حال آماده‌سازی بود؛ Android SDK و تست/Build هنوز pending بودند.
+- Artifact APK هنوز ایجاد نشده است.
+- تعداد milestoneهای اصلی باقیمانده: 5؛ milestone شمارهٔ 1 (CI retest) اکنون در حال اجراست؛ پس از موفقیت آن 4 milestone اصلی دیگر باقی می‌ماند.
