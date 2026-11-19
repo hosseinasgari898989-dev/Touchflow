@@ -1014,3 +1014,18 @@ Latest confirmed save-fix APK:
 6. فقط پس از Run واقعی، گزارش لاگ، تست‌های اجراشده، APK، package، label، امضا و permissionها را ثبت کن. در شکست، فقط همان خطای ثبت‌شده را اصلاح کن.
 7. پس از سبزشدن Build، دروازهٔ تست دستگاه و تست Save همچنان جدا هستند. گام ۲ تا بررسی کامل گام ۱ شروع نشود.
 
+
+
+### 12.7 ثبت رویداد آپلود و اولین اجرای واقعی Workflow — 2026-11-20
+- مالک تأیید کرد آرشیو را در ریشهٔ شاخهٔ `feature/step1-build-bootstrap-2026-11-20` آپلود کرده است.
+- فایل در GitHub با مسیر `TouchFlow-Step1-source.tar.xz` پیدا شد؛ Git blob SHA: `e9f41d4e39d2a4dffe9481b9a0d8cffb4b17c06a`.
+- محتوا از GitHub با Base64 خوانده و در محیط محاسباتی هش شد: decoded size = `162524` bytes؛ SHA-256 = `8811c815e01c415e48dde1f18a4b94e35d8c87bc6c106b6e2462d6ddb623f30c`. تطبیق با hash دریافتی Claude **EXACT MATCH**.
+- آرشیو از نظر ساختار محلی نیز با `tar -tJf` بررسی شد؛ مسیر ریشه `GrandmaConnectNative/` است؛ Gradle project، Manifest، accessibility config و سه کلاس تست در مسیرهای مورد انتظار وجود دارند.
+- تعداد annotationهای JUnit `@Test` در سه فایل تست: 13 (شمارش ایستا؛ هنوز نتیجهٔ اجرای JUnit نیست).
+- Workflow فعال‌شده: `.github/workflows/build-touchflow-step1.yml`; Workflow قدیمی `.github/workflows/build-touchflow-feature-pack.yml` دست‌نخورده باقی مانده است.
+- Workflow run: [44633139815](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44633139815), run number 1, event `push`, head commit `2a638f4f027eb7609a0ce8c044469468564e4aa1`.
+- Job `build` ID `135944746691` در آخرین بررسی `in_progress` بود. مراحل تمام‌شده و موفق: Set up job, Checkout, Verify source archive hash, Extract source, List test sources, Set up JDK 17. مرحلهٔ Gradle 8.9 در حال اجرا بود؛ Android SDK، JUnit، شمارش تست، assembleDebug و verification هنوز pending بودند.
+- Artifact در زمان این ثبت هنوز ساخته نشده بود. نتیجهٔ نهایی Run **PENDING / NOT VERIFIED** است؛ نتیجهٔ Build، تست‌ها و امضا را حدس نزن.
+- Commit فعال‌سازی Workflow: `2a638f4f027eb7609a0ce8c044469468564e4aa1`.
+- آخرین branch head باید در شروع گفتگوی بعدی دوباره از GitHub خوانده شود؛ شاخهٔ کاری فعلی همان `feature/step1-build-bootstrap-2026-11-20` است.
+- `main` هنوز `6c738c2214d4244913fe449ed6172db613f844bd` و backup اصلی هنوز `d62899f0eb586a870471648fd3d77d4b8f50fb8d` است؛ PR #4 هنوز Open / Unmerged است. این وضعیت پیش از پایان Run دوباره بررسی شده و تغییری در آن‌ها ندیدیم.
