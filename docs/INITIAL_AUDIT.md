@@ -24,53 +24,45 @@ Read-only inspection of the owner APK, the source archive snapshots and successf
 - Full apksigner verification: NOT RUN
 - Private signing key: NOT FOUND
 
-## Source lineage identified
+## Exact source and APK match
 
-High-confidence matching source archive:
-- Workflow run: [44399759542](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44399759542)
+The exact source/build is [GitHub Actions run 44399521736](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44399521736):
+
 - Branch: `feature/expanded-capture-settings-2026-11-19`
-- Commit: `36b67597a86a84c093cc9c50ec2e32af6e4dbad8`
-- Archive: `GrandmaConnectNative-source-v2.tar.xz`
-- Archive SHA-256: `e77c6b383251cd584b60cd6f4ae6b0ab445202970758d2c851e8bdc359b97a98`
+- Commit: `36600aa02fba13430ba6a1e9e2efc09f665b7b67`
+- Run result: success
+- Build output: `app-debug.apk`
+- Owner APK and build output have the same size (866,747 bytes) and the same SHA-256:
+  `6dce713dfebcbf84ed5a175b6eb73808791765464087526875c3fe6f11bd0b89`
+- The exact source artifact is `GrandmaConnectNative-source-v2.tar.xz`, SHA-256:
+  `e77c6b383251cd584b60cd6f4ae6b0ab445202970758d2c851e8bdc359b97a98`
+- The signing certificate fingerprint extracted from the exact build output matches the owner APK.
 
-Comparison with that workflow's APK output:
-- Owner APK: 866,747 bytes, SHA-256 `6dce713dfebcbf84ed5a175b6eb73808791765464087526875c3fe6f11bd0b89`
-- CI output: 866,755 bytes, SHA-256 `46b48ac853739a44d8b1ff1ec7da341a984cb6fa91b4a0c541f075086f5a5770`
-- AndroidManifest.xml, all three DEX files, Kotlin builtins and accessibility_service_config.xml: identical.
-- Only differing ZIP entry: resources.arsc (1284 vs 1292 bytes).
-- APK total-size difference: 8 bytes.
+Therefore the source archive and run 44399521736 are the exact known provenance of the owner APK.
 
-Conclusion: the expanded-capture source is a high-confidence match for the owner's baseline compiled code and manifest. Exact whole-APK equivalence is not claimed.
+### Later CI behavior
+
+Run [44399759542](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44399759542) used the same source archive hash and compiled DEX/manifest, but its APK output differed:
+- It was 866,755 bytes (8 bytes larger).
+- Only `resources.arsc` differed from the baseline; manifest, all three DEX files, Kotlin builtins and Accessibility config were identical.
+- Its debug certificate fingerprint was `37:12:86:D4:6F:87:4E:E1:BC:BC:83:CF:77:09:02:19:06:90:EE:C2:E8:85:2E:E1:E8:5C:32:3A:8B:52:C0:75`, which differs from the baseline.
+
+This proves the workflow can generate a different debug signing key on a later run. The original private key is not present in the source artifact, build artifact or inspected source tree.
 
 ## Signing blocker
 
-The CI APK built from the matched source uses a different debug certificate:
-`37:12:86:D4:6F:87:4E:E1:BC:BC:83:CF:77:09:02:19:06:90:EE:C2:E8:85:2E:E1:E8:5C:32:3A:8B:52:C0:75`.
+For an in-place Android update, the application ID must match and the signing certificate must match (or a valid signing lineage must exist), and versionCode must be equal or higher. References: [Android app updates](https://developer.android.com/google/play/app-updates), [Android app signing](https://developer.android.com/studio/publish/app-signing).
 
-The baseline certificate is `7E:AE:68:77:3E:0E:AF:E0:B1:FB:A9:32:01:CE:67:DC:2B:6D:FB:21:57:FC:81:54:73:23:95:A9:C7:06:1D:08`. The matching private keystore is not present in the inspected repo/source/artifacts. Do not assume a new CI APK can update an existing install.
+The original certificate fingerprint is known, but its private key is NOT FOUND. Keep `com.grandmaconnect.preview` unchanged for a possible update, but do not publish a new CI APK as an update unless the original signing key is recovered. Otherwise use a separate-install migration after adding and testing macro export/import.
 
-Android's update requirements: same application ID, same signing certificate or valid signing lineage, and equal-or-higher versionCode. References: [Android app updates](https://developer.android.com/google/play/app-updates), [Android app signing](https://developer.android.com/studio/publish/app-signing).
+## Selected source branch and backup
 
-## Existing source candidates
+The exact build commit is now the canonical source starting point:
+- Immutable backup branch: `backup/touchflow-v1-exact-baseline-2026-11-19`
+- Working branch: `feature/touchflow-v1-cleanup-exact-baseline-2026-11-19`
+- Both start from `36600aa02fba13430ba6a1e9e2efc09f665b7b67`.
 
-### Main source archive
-
-- Root file: `GrandmaConnectNative-source.zip`
-- It is the legacy base and not the source snapshot most closely matching the owner APK.
-- Its Gradle configuration uses namespace/applicationId `com.grandmaconnect`, base versionName `0.1.0-alpha`, minSdk 24, targetSdk 35.
-
-### Expanded capture settings source — selected baseline
-
-- Adds `MacroSettings.kt` and modifies `MainActivity.kt`, `MacroModels.kt`, `MacroAccessibilityService.kt` and `TouchCanvasView.kt`.
-- Provides standard capture limits plus an extended mode for 2, 5 or 10 minutes.
-- A hard 10-minute ceiling remains; the current UI does not mean unlimited capture.
-- This is the chosen source base for the next cleanup branch.
-
-### TouchFlow Simple and WebView integration prototypes
-
-- Simple branch adds related capture settings and some macro actions; its APK package identity and compiled code do not match the owner baseline.
-- WebView integration branch contains a UI prototype. Its timeline/keyframe track data is marked as mock data; keyframe persistence/easing dispatch and backup import/export are unsupported in that slice.
-- Do not merge either branch wholesale into the selected baseline.
+Earlier branches made from commit `36b67597a86a84c093cc9c50ec2e32af6e4dbad8` are retained unchanged as secondary rollback references. They are not the canonical exact-build starting branch.
 
 ## Functional audit
 
@@ -106,8 +98,8 @@ The first cleanup should be targeted changes, not deletion of these core modules
 
 ## Current outcome
 
-- The baseline APK and an updated backup kit are preserved.
-- High-confidence source lineage is identified.
-- A source backup branch and a dedicated cleanup branch have been created from the matching source commit.
+- The owner APK has exact source/build provenance (run 44399521736, commit `36600aa`).
+- Exact baseline APK and source artifacts are preserved.
+- Baseline and later-run signing certificates differ; the original private key is not found.
+- The canonical source backup and cleanup branches are based on the exact build commit.
 - No application code or APK has been changed or published.
-- The original signing key remains the principal blocker for in-place updates.
