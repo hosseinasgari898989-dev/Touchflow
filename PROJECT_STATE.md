@@ -8,6 +8,7 @@ Last updated: 2026-11-19
 - Repository: https://github.com/hosseinasgari898989-dev/Touchflow
 - Default branch: `main`
 - Cleanup branch: `feature/touchflow-clean-foundation-2026-11-19`
+- Documentation PR: [#1 — establish TouchFlow v1 baseline and cleanup rules](https://github.com/hosseinasgari898989-dev/Touchflow/pull/1) — OPEN, DRAFT, NOT MERGED.
 
 ## Initial APK baseline
 
@@ -20,6 +21,13 @@ Last updated: 2026-11-19
 - Package/version/signer metadata: NOT VERIFIED
 - Binary committed to GitHub: NO; preserved in current work session and backup-kit ZIP.
 - Match to known main/simple/integration build outputs: NO; all three differ byte-for-byte.
+
+## Backup kit
+
+- Local bundle: `/mnt/data/TouchFlow-v1.0.0-backup-kit.zip`
+- Bundle SHA-256: `2be92336c6ab173e48633b420ae9898289582fea2193c68c497be996af8976a1`
+- Contains the owner APK, its SHA-256 record, three source candidate archives, and build comparison notes.
+- The backup kit is downloadable from this conversation; it is not yet stored in the GitHub repository.
 
 ## Repository findings
 
@@ -45,10 +53,11 @@ Last updated: 2026-11-19
 - Created `feature/touchflow-clean-foundation-2026-11-19` from main.
 - Rebranded README to TouchFlow.
 - Added `docs/BASELINE.md`, `docs/RELEASE_POLICY.md`, `docs/INITIAL_AUDIT.md`, and this state file.
-- Created a local baseline copy and a backup-kit ZIP with checksum and three source candidate archives.
+- Created a local baseline copy and backup-kit ZIP with checksum and three source candidate archives.
+- Opened draft PR #1. It contains documentation only and has not been merged.
 - No source code, manifest, build workflow, permission, secret, variable, or deployment setting changed.
 - Main and `backup/native-baseline-2026-11-19` remain unchanged.
-- No PR has been merged and no new APK release has been published.
+- No APK release has been published.
 
 ## Next steps
 
