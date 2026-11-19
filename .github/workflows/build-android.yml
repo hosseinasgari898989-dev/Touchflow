@@ -1,38 +1,51 @@
-name: Build Grandma Connect APK
+name: Build TouchFlow Side-by-Side Preview
 
 on:
   push:
-    branches: [feature/expanded-capture-settings-2026-11-19]
+    branches: [feature/touchflow-v1-cleanup-exact-baseline-2026-11-19]
     paths:
       - '.source-v2/READY'
-      - '.github/workflows/build-android.yml'
 
 permissions:
   contents: read
 
 jobs:
-  build-debug-apk:
+  build-touchflow-preview:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Assemble and verify native source archive
+      - name: Verify and extract TouchFlow source archive
+        shell: bash
         run: |
+          set -euo pipefail
           test -s .source-v2/READY
-          cat .source-v2/part-* > /tmp/source-v2.b64
-          base64 --decode /tmp/source-v2.b64 > GrandmaConnectNative-source-v2.tar.xz
-          tar -tJf GrandmaConnectNative-source-v2.tar.xz >/dev/null
-          tar -xJf GrandmaConnectNative-source-v2.tar.xz
-          test -f GrandmaConnectNative/settings.gradle.kts
-          test -f GrandmaConnectNative/app/src/main/java/com/grandmaconnect/MacroSettings.kt
+          grep -Fx 'name=TouchFlowNative-source-v1.tar.xz' .source-v2/READY
+          grep -Fx 'sha256=8cbda487156a50cc1a327eab683275aae8d2c2893cec242f23b89b8ff97027f0' .source-v2/READY
+          grep -Fx 'parts=4' .source-v2/READY
+          cat .source-v2/part-* > /tmp/touchflow-source.b64
+          base64 --decode /tmp/touchflow-source.b64 > /tmp/TouchFlowNative-source-v1.tar.xz
+          echo '8cbda487156a50cc1a327eab683275aae8d2c2893cec242f23b89b8ff97027f0  /tmp/TouchFlowNative-source-v1.tar.xz' | sha256sum -c -
+          tar -tJf /tmp/TouchFlowNative-source-v1.tar.xz >/dev/null
+          mkdir -p /tmp/touchflow-source
+          tar -xJf /tmp/TouchFlowNative-source-v1.tar.xz -C /tmp/touchflow-source
+          test -f /tmp/touchflow-source/TouchFlowNative/settings.gradle.kts
+          test -f /tmp/touchflow-source/TouchFlowNative/app/src/main/java/com/grandmaconnect/MainActivity.kt
+          test -f /tmp/touchflow-source/TouchFlowNative/app/src/main/res/values/strings.xml
 
-      - name: Isolate preview app identity
+      - name: Isolate preview app identity for side-by-side installation
+        shell: bash
         run: |
-          sed -i 's/applicationIdSuffix = ".debug"/applicationIdSuffix = ".preview"/' GrandmaConnectNative/app/build.gradle.kts
-          sed -i 's/versionNameSuffix = "-debug"/versionNameSuffix = "-preview"/' GrandmaConnectNative/app/build.gradle.kts
-          grep -F 'applicationIdSuffix = ".preview"' GrandmaConnectNative/app/build.gradle.kts
+          set -euo pipefail
+          APP=/tmp/touchflow-source/TouchFlowNative/app
+          sed -i 's/applicationIdSuffix = ".debug"/applicationIdSuffix = ".touchflowpreview"/' "$APP/build.gradle.kts"
+          sed -i 's/versionNameSuffix = "-debug"/versionNameSuffix = "-touchflow-preview"/' "$APP/build.gradle.kts"
+          grep -F 'applicationIdSuffix = ".touchflowpreview"' "$APP/build.gradle.kts"
+          grep -F '<string name="app_name">TouchFlow</string>' "$APP/src/main/res/values/strings.xml"
+          grep -F 'android:label="@string/app_name"' "$APP/src/main/AndroidManifest.xml"
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -49,21 +62,32 @@ jobs:
         with:
           packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
 
-      - name: Build debug APK
-        run: gradle --no-daemon --stacktrace -p GrandmaConnectNative assembleDebug
+      - name: Build preview APK
+        run: gradle --no-daemon --stacktrace -p /tmp/touchflow-source/TouchFlowNative assembleDebug
 
-      - name: Upload debug APK
+      - name: Verify package, label, version and APK signature
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK=/tmp/touchflow-source/TouchFlowNative/app/build/outputs/apk/debug/app-debug.apk
+          test -s "$APK"
+          $ANDROID_HOME/build-tools/35.0.0/aapt dump badging "$APK" | grep -F "package: name='com.grandmaconnect.touchflowpreview'"
+          $ANDROID_HOME/build-tools/35.0.0/aapt dump badging "$APK" | grep -F "application-label:'TouchFlow'"
+          $ANDROID_HOME/build-tools/35.0.0/aapt dump badging "$APK" | grep -F "versionCode='1'"
+          $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose "$APK"
+
+      - name: Upload TouchFlow preview APK
         uses: actions/upload-artifact@v4
         with:
-          name: grandma-connect-expanded-capture-debug-apk
-          path: GrandmaConnectNative/app/build/outputs/apk/debug/app-debug.apk
+          name: touchflow-v1.0.0-branding-preview-apk
+          path: /tmp/touchflow-source/TouchFlowNative/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30
 
-      - name: Upload reproducible source archive
+      - name: Upload exact TouchFlow source archive
         uses: actions/upload-artifact@v4
         with:
-          name: grandma-connect-expanded-capture-source
-          path: GrandmaConnectNative-source-v2.tar.xz
+          name: touchflow-v1.0.0-branding-source
+          path: /tmp/TouchFlowNative-source-v1.tar.xz
           if-no-files-found: error
           retention-days: 30
