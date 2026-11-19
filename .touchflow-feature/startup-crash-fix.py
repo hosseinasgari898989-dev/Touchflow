@@ -34,6 +34,14 @@ changes = [
         "    private fun showToolsHome()",
         "post-content system bar sequence",
     ),
+    (
+        "            saveButton.visibility = if (capturedGroups.isNotEmpty()) View.VISIBLE else View.GONE\\n"
+        "            stopFloating.visibility = View.GONE\\n",
+        "            saveButton.visibility = if (capturedGroups.isNotEmpty()) View.VISIBLE else View.GONE\\n"
+        "            saveButton.isEnabled = capturedGroups.isNotEmpty()\\n"
+        "            stopFloating.visibility = View.GONE\\n",
+        "enable save only after a non-empty recording",
+    ),
 ]
 
 for old, new, label in changes:
@@ -49,5 +57,13 @@ if "setNormalSystemBars()" in on_create:
 if home.index("setNormalSystemBars()") < home.index("setContentView(scrollable(page))"):
     raise SystemExit("showHome calls setNormalSystemBars() before setContentView")
 
+stopped_controls = source.split("fun showStoppedControls(message: String) {", 1)[1].split("\\n        }", 1)[0]
+visibility_line = "saveButton.visibility = if (capturedGroups.isNotEmpty()) View.VISIBLE else View.GONE"
+enabled_line = "saveButton.isEnabled = capturedGroups.isNotEmpty()"
+if visibility_line not in stopped_controls or enabled_line not in stopped_controls:
+    raise SystemExit("save button state is not derived from captured groups")
+if stopped_controls.index(visibility_line) > stopped_controls.index(enabled_line):
+    raise SystemExit("save button enabled-state update order is invalid")
+
 path.write_text(source, encoding="utf-8")
-print(f"Applied targeted startup fix to {path}")
+print(f"Applied startup and save-enable fixes to {path}")
