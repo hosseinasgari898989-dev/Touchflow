@@ -795,3 +795,48 @@ Status: DONE (identity comparison)
   - Baseline app: `com.grandmaconnect.preview`
 - اگر برای تست نیاز به جایگزینی Preview قبلی باشد، فقط برنامهٔ `TouchFlow Feature Preview` را حذف کنید؛ APK/برنامهٔ baseline با package `com.grandmaconnect.preview` را حذف نکنید. حذف Preview قبلی داده‌های همان package را پاک می‌کند؛ اگر دادهٔ قابل نگهداری در آن وجود دارد، پیش از حذف باید مسیر جایگزین با package مجزا یا امضای پایدار بررسی شود.
 - هیچ کلید خصوصی یا keystore جدیدی ساخته/ثبت/منتشر نشده است.
+
+### 2026-11-20 — نتیجه تست دستی APK Startup Fix و تشخیص باگ ذخیره
+Status: IN PROGRESS (باگ ذخیره مشخص و اصلاح در helper اعمال شده؛ CI جدید و retest واقعی در انتظار)
+Branch: `feature/touchflow-feature-pack-bundle-fix-2026-11-19`
+Backup before this change: `backup/touchflow-before-save-ui-fix-2026-11-20`
+Previous successful APK CI: `44610974639` / APK artifact `14572996352`
+
+**Owner/device test feedback**
+- APK جدید نصب شد: SUCCESS (user-confirmed).
+- Accessibility permission enabled: SUCCESS (user-confirmed).
+- Widget permission/access was reported available; widget playback/use was NOT tested.
+- Touch recording recognized multiple touches on the recorder canvas (user-confirmed).
+- After stopping recording, Save Macro control remained dark/disabled and could not be tapped.
+- Because save did not complete, macro management and actual widget playback testing were not reached.
+- User also reports no visible Full Screen option.
+
+**Confirmed save-button root cause (source lines at pre-fix archive)**
+- `MainActivity.showRecorder()` initializes `saveButton.isEnabled = false` once.
+- `showStoppedControls()` sets button visibility according to `capturedGroups.isNotEmpty()`, but never re-enables it.
+- Repository search found no other assignment to `saveButton.isEnabled`; therefore after stop the button can be visible but remains disabled, matching the exact device observation.
+- Minimal fix: in `showStoppedControls()`, set `saveButton.isEnabled = capturedGroups.isNotEmpty()` immediately after setting visibility. This enables saving only when at least one group was captured and keeps empty recordings unsaveable.
+
+**Fullscreen behavior — source facts**
+- `showRecorder()` calls `setImmersiveSystemBars()` and posts a second application after `setContentView(frame)`; status/navigation bars are automatically hidden during the recorder Activity.
+- There is no user-configurable Full Screen switch in the settings screen.
+- `TouchCanvasView` fills the recorder Activity's `FrameLayout` and receives MotionEvents through its own `onTouchEvent()`. It captures gestures only where Android dispatches touch events to this app's View.
+- `MacroAccessibilityService.onAccessibilityEvent()` is intentionally empty and does not collect touch input from other apps. Therefore the current implementation is an immersive/full-viewport recorder inside TouchFlow, not a device-wide recorder that captures gestures in arbitrary apps. This distinction must be made explicit before designing another capture mode.
+- No fullscreen architecture or settings UI has been changed in this patch.
+
+**MagicPath UI investigation**
+- Existing MagicPath project: `TouchFlow – Android UI Redesign`, project id `474228529169580032`, component `TouchFlow mobile UI concept`, generatedName `wondrous-sun-8199`.
+- Its component is React/TypeScript/Tailwind, not Android Kotlin. The current component text explicitly labels the UI as preview-only and says it is not connected to real touch recording; its recording screen is a visual mock and contains no native capture/save integration.
+- The current GitHub workflow builds the hash-locked `GrandmaConnectNative` source archive and applies a Kotlin transformer; it does not import MagicPath React code. This is why the MagicPath visual design did not appear in the installed APK.
+- MagicPath Free plan is available at $0 with bounded design credits and agent-call allowance. Existing integration quota reported 24 of 50 weekly calls remaining (resets 2026-11-26). MagicPath can remain the visual design source; its React component must be translated into the existing native Android UI (or a planned native Compose migration) before it affects the APK.
+- No MagicPath project/component or native app visual redesign was changed in this task.
+
+**Minimal save-button patch and local checks**
+- Updated `.touchflow-feature/startup-crash-fix.py` to apply the one-line state correction together with the already-validated startup crash fix.
+- Backup branch created before helper modification: `backup/touchflow-before-save-ui-fix-2026-11-20`.
+- Applied transformer successfully to a fresh extraction of source artifact `14569031661`.
+- Source assertions: 4 passed; verified visibility is based on group count and enabled state is assigned from the same condition.
+- Existing pure Kotlin test: `MacroSplitRulesTest: 10 assertions passed`.
+- No new APK or Android runtime test yet. CI trigger marker not yet changed.
+- Next: trigger one feature-branch CI build; inspect patch step, unit tests, APK package/signature and artifacts. Then owner repeats a short test: record 2-3 taps, stop, confirm Save becomes enabled, save and verify macro appears in list. Do not advance to macro management/widget playback until that works.
+- After save flow works, collect an exact screenshot/list of visual issues, clarify whether Full Screen means (a) a user switch for immersive bars or (b) recording touches across other applications, then plan native UI integration based on MagicPath visual reference. Do not claim device-wide capture exists.
