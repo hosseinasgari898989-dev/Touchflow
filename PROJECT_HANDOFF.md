@@ -355,9 +355,9 @@ Next:
 Status: IN PROGRESS (آمادهٔ CI؛ Build Android هنوز منتظر نتیجهٔ GitHub Actions)
 Branch: `feature/touchflow-first-feature-pack-2026-11-19`
 Source archive: `TouchFlowFeaturePack-source.tar.xz`
-Archive SHA-256: `03bac4a8857e5c08ad2c4e72b22f8db33b365ab03637c2365d6e61387a319fd1`
+Archive SHA-256: `8288df571300bccf54489bbb82289991d3b2a1a59a2ca4014b3859055ded8532`
 Archive size: 25,088 bytes
-Git path: `.touchflow-feature/source.tar.xz` (binary blob; no base64 part files)
+Git path: `.touchflow-feature/part-00` … `.touchflow-feature/part-08` (9 ordered Base64 text segments; workflow concatenates before decoding)
 Local checks:
 - `MacroSplitRulesTest: 10 assertions passed`
 - تمام XMLهای Android با XML parser خوانده شدند.
@@ -371,10 +371,26 @@ Local checks:
 ### 2026-11-19 — بستهٔ نهایی برای Build آزمایشی آماده شد
 Status: IN PROGRESS (منتظر ثبت archive/workflow و نتیجهٔ CI)
 - Archive نهایی پس از آخرین تغییرهای Manifest و بررسی جهت صفحه بازسازی شد.
-- SHA-256 نهایی: `03bac4a8857e5c08ad2c4e72b22f8db33b365ab03637c2365d6e61387a319fd1`
+- SHA-256 نهایی: `8288df571300bccf54489bbb82289991d3b2a1a59a2ca4014b3859055ded8532`
 - حجم آرشیو: 25,156 bytes.
 - Workflow مخصوص شاخهٔ feature آماده شده: `.github/workflows/build-touchflow-feature-pack.yml`.
 - Workflow قرار است `testDebugUnitTest assembleDebug` را اجرا کند و package جداگانهٔ `com.grandmaconnect.feature` را با label `TouchFlow Feature Preview` و signature معتبر بررسی کند.
 - آخرین تست محلی pure Kotlin: 10/10 assertion passed.
 - آخرین بررسی XML: همهٔ resourceهای XML قابل parse هستند.
 - Android Build و APK هنوز NOT VERIFIED تا دریافت نتیجهٔ Actions.
+
+
+### 2026-11-19 — سورس نهایی به شاخهٔ GitHub منتقل شد
+Status: IN PROGRESS (سورس بخش‌بندی و ثبت شد؛ Build CI در انتظار)
+Branch: `feature/touchflow-first-feature-pack-2026-11-19`
+Source baseline: `f479a3b10d7639ae1207915f3d9f2efbfc6cbcdc`
+Archive: `TouchFlowFeaturePack-source.tar.xz`
+Archive SHA-256: `8288df571300bccf54489bbb82289991d3b2a1a59a2ca4014b3859055ded8532`
+Archive size: 25,376 bytes
+Transfer representation: 9 ordered Base64 text parts at `.touchflow-feature/part-00` through `part-08`.
+Workflow now concatenates these parts, decodes, verifies SHA-256 and tar integrity before extracting/building.
+Local final verification immediately before transfer:
+- `MacroSplitRulesTest: 10 assertions passed`
+- 6 Android XML files parsed successfully.
+- Android/Gradle local build: NOT RUN (toolchain absent).
+- Device test: NOT RUN.
