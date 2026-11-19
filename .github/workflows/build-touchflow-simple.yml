@@ -6,6 +6,7 @@ on:
       - feature/touchflow-simple-runner-2026-11-19
     paths:
       - '.touchflow-simple/READY'
+      - '.touchflow-simple/part-*'
       - '.github/workflows/build-touchflow-simple.yml'
 
 permissions:
