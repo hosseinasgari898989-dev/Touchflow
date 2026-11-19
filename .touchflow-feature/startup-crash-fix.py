@@ -35,11 +35,11 @@ changes = [
         "post-content system bar sequence",
     ),
     (
-        "            saveButton.visibility = if (capturedGroups.isNotEmpty()) View.VISIBLE else View.GONE\\n"
-        "            stopFloating.visibility = View.GONE\\n",
-        "            saveButton.visibility = if (capturedGroups.isNotEmpty()) View.VISIBLE else View.GONE\\n"
-        "            saveButton.isEnabled = capturedGroups.isNotEmpty()\\n"
-        "            stopFloating.visibility = View.GONE\\n",
+        "            saveButton.visibility = if (capturedGroups.isNotEmpty()) View.VISIBLE else View.GONE\n"
+        "            stopFloating.visibility = View.GONE\n",
+        "            saveButton.visibility = if (capturedGroups.isNotEmpty()) View.VISIBLE else View.GONE\n"
+        "            saveButton.isEnabled = capturedGroups.isNotEmpty()\n"
+        "            stopFloating.visibility = View.GONE\n",
         "enable save only after a non-empty recording",
     ),
 ]
