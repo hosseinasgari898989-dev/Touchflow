@@ -57,7 +57,7 @@ if "setNormalSystemBars()" in on_create:
 if home.index("setNormalSystemBars()") < home.index("setContentView(scrollable(page))"):
     raise SystemExit("showHome calls setNormalSystemBars() before setContentView")
 
-stopped_controls = source.split("fun showStoppedControls(message: String) {", 1)[1].split("\\n        }", 1)[0]
+stopped_controls = source.split("fun showStoppedControls(message: String) {", 1)[1].split("\n        }", 1)[0]
 visibility_line = "saveButton.visibility = if (capturedGroups.isNotEmpty()) View.VISIBLE else View.GONE"
 enabled_line = "saveButton.isEnabled = capturedGroups.isNotEmpty()"
 if visibility_line not in stopped_controls or enabled_line not in stopped_controls:
