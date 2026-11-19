@@ -7,8 +7,8 @@ Last updated: 2026-11-19
 - Project: **TouchFlow**
 - Repository: https://github.com/hosseinasgari898989-dev/Touchflow
 - Default branch: `main`
-- Documentation branch: `feature/touchflow-clean-foundation-2026-11-19`
-- Documentation PR: [#1](https://github.com/hosseinasgari898989-dev/Touchflow/pull/1) — open, draft, not merged.
+- Documentation branch (source of PR #1): `feature/touchflow-clean-foundation-2026-11-19`
+- Documentation foundation: [PR #1](https://github.com/hosseinasgari898989-dev/Touchflow/pull/1).
 - Exact baseline build: [run 44399521736](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44399521736)
 - Exact source commit: `36600aa02fba13430ba6a1e9e2efc09f665b7b67`
 - Canonical source backup: `backup/touchflow-v1-exact-baseline-2026-11-19`
@@ -63,7 +63,7 @@ Last updated: 2026-11-19
 - Added/updated BASELINE, RELEASE_POLICY, INITIAL_AUDIT, CLEANUP_PLAN and state documentation on the documentation branch.
 - No application source, Manifest, Gradle file, workflow, permission, secret, variable or deployment config has been changed.
 - `main` and `backup/native-baseline-2026-11-19` remain unchanged.
-- No APK release published and no PR merged.
+- No APK release has been published.
 
 ## Next steps
 
