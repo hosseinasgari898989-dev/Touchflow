@@ -1029,3 +1029,28 @@ Latest confirmed save-fix APK:
 - Commit فعال‌سازی Workflow: `2a638f4f027eb7609a0ce8c044469468564e4aa1`.
 - آخرین branch head باید در شروع گفتگوی بعدی دوباره از GitHub خوانده شود؛ شاخهٔ کاری فعلی همان `feature/step1-build-bootstrap-2026-11-20` است.
 - `main` هنوز `6c738c2214d4244913fe449ed6172db613f844bd` و backup اصلی هنوز `d62899f0eb586a870471648fd3d77d4b8f50fb8d` است؛ PR #4 هنوز Open / Unmerged است. این وضعیت پیش از پایان Run دوباره بررسی شده و تغییری در آن‌ها ندیدیم.
+
+
+### 12.8 نتیجهٔ کامل اولین CI — Run 44633139815 (FAILURE)
+- Run: [44633139815](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44633139815), commit `2a638f4f027eb7609a0ce8c044469468564e4aa1`.
+- Archive SHA verification: PASS (exact match, 162,524 bytes).
+- Extract source: PASS.
+- Source list: PASS.
+- JDK 17: PASS.
+- Gradle 8.9: PASS.
+- Android SDK 35: PASS.
+- Kotlin app source and unit-test source compilation completed; JUnit task then failed at test assertion, not at compilation.
+- JUnit total: 13; passed: 12; failed: 1; skipped: 0.
+- Exact failure: `SearchRulesTest > allTokensMustMatchAcrossFields FAILED`, `SearchRulesTest.kt:30`, `java.lang.AssertionError`.
+- JUnit XML artifact `14582318844` confirms the failing line was `SearchRules.matches("چت تلگرام", "تلگرام", "org.telegram.chat")`. The SearchRules implementation normalizes Arabic/Persian letter variants, digits, ZWNJ/tatweel and case; it does not translate synonyms or Persian words into English. The token `چت` does not occur in either supplied field; package field contains English `chat`. Therefore this is a test-fixture mismatch against the documented behavior, not evidence of a production-code or Gradle compilation failure.
+- `assembleDebug` and package/signature verification were correctly skipped because JUnit failed. **No successful APK was produced by Run 1.**
+- Diagnostic artifact: [touchflow-feature-build artifact 14582318844](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44633139815/artifacts/14582318844); includes original archive, JUnit XML and HTML report.
+- Minimal correction applied only to the test fixture: replace query token `چت` with `chat` on the cross-fields assertion, so the test checks one token in the label and one in the package name. Production `SearchRules.kt`, app UI/runtime source, Manifest and permissions remain untouched.
+- The explicit patch is committed at `.github/patches/step1-search-rules-test-fixture.patch` (blob `34746fb1b09c8a41e6d934b172a5644f240ee9b4`). Workflow applies this one visible patch after extraction; original Claude archive remains intact with the original verified SHA.
+- Updated workflow commit: `15d1c2668e10b6cb5ca81b2c54039475b731f5d9`; a second run has been triggered.
+
+### 12.9 Second CI attempt — pending
+- Run: [44633470736](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44633470736), run number 2, head commit `15d1c2668e10b6cb5ca81b2c54039475b731f5d9`.
+- Job `build` ID `135945912338` was `in_progress` at the last observation. Checkout was running; subsequent steps were pending.
+- Expected next checks: archive hash, extraction, application of the documented test-only patch, JUnit (13 tests), nonzero count, assembleDebug, package/label/signature and privacy config.
+- Second run conclusion, artifacts and APK hash: **NOT YET VERIFIED**. Fetch current run/job before claiming result.
