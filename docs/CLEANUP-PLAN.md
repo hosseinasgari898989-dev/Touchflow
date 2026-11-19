@@ -1,12 +1,13 @@
 # TouchFlow native cleanup plan
 
-This plan is based on the selected source commit `36b67597a86a84c093cc9c50ec2e32af6e4dbad8`, whose compiled code and manifest closely match the owner APK. No source deletion is approved by this audit.
+This plan is based on the exact build commit `36600aa02fba13430ba6a1e9e2efc09f665b7b67`, whose successful GitHub Actions output is byte-for-byte identical to the owner-provided APK. No source deletion is approved by this audit.
 
 ## Branch safety
 
-- Immutable source backup: `backup/touchflow-v1-native-source-2026-11-19`
-- Working branch: `feature/touchflow-v1-native-cleanup-2026-11-19`
-- Both branches start at commit `36b67597a86a84c093cc9c50ec2e32af6e4dbad8`.
+- Canonical immutable source backup: `backup/touchflow-v1-exact-baseline-2026-11-19`
+- Canonical working branch: `feature/touchflow-v1-cleanup-exact-baseline-2026-11-19`
+- Both branches start at exact baseline source commit `36600aa02fba13430ba6a1e9e2efc09f665b7b67`.
+- Earlier secondary branches based on `36b67597a86a84c093cc9c50ec2e32af6e4dbad8` are retained unchanged.
 - Keep `main` and `backup/native-baseline-2026-11-19` unchanged.
 - Make small changes through PRs. No merge or release without explicit review.
 
@@ -20,7 +21,7 @@ This plan is based on the selected source commit `36b67597a86a84c093cc9c50ec2e32
 | `app/src/main/java/com/grandmaconnect/TouchCanvasView.kt` | Captures touch sequences within the in-app canvas |
 | `app/src/main/java/com/grandmaconnect/MacroModels.kt` | Macro data schema, validation, JSON serialization and persistence |
 | `app/src/main/java/com/grandmaconnect/MacroAccessibilityService.kt` | Accessibility playback, callbacks, playback state and stop notification |
-| `app/src/main/java/com/grandmaconnect/MacroSettings.kt` | Capture profiles, quality options, configurable duration and hard safety limits |
+| `app/src/main/java/com/grandmaconnect/MacroSettings.kt` | Capture profiles, quality options, configurable duration and hard limits |
 | `app/src/main/res/xml/accessibility_service_config.xml` | Declares gesture capability and current no-window-content privacy setting |
 | `app/src/main/AndroidManifest.xml` | Declares app entry points, service, receiver and permission |
 | `app/build.gradle.kts`, root Gradle files | Required Android/Kotlin build configuration |
@@ -48,7 +49,7 @@ No dead core module or safe source-file deletion has been established.
 - Preserve receiver action `com.grandmaconnect.STOP_PLAYBACK`.
 - Preserve the notification channel ID to avoid unexpected user notification behavior.
 - Increment versionCode only after the signing key and update path are verified.
-- The baseline signing certificate is not the same as the latest CI build certificate. Find/recover the original private key before promising an update; do not replace it with another ephemeral debug key.
+- The exact baseline build is known, but the private debug keystore was not in its artifacts. A later run used a different debug key. Do not promise in-place update until the original key is recovered or separately plan a migration.
 
 ### ADD — staged features
 
@@ -90,7 +91,7 @@ No dead core module or safe source-file deletion has been established.
 
 ## Required validation before any APK release
 
-- Clean build from the selected source commit.
+- Clean build from exact baseline source commit.
 - Verify package ID, versionCode/name, min/target SDK, debuggable state, permissions and service metadata.
 - Verify APK signature and compare certificate/lineage with the baseline.
 - Round-trip macro export/import and reopen old schema-1 macros.
