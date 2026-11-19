@@ -955,3 +955,51 @@ Latest confirmed save-fix APK:
 **No implementation authorization beyond this requirements handoff**
 - This entry records the scope and feasibility constraints only. No Android code, Manifest, settings, widget, main branch or baseline changed.
 - Preserve current rule: test the already-built save-fix APK on the target phone first; do not label Save fixed in runtime until the owner reports the result. Work after that gate must proceed in small, backed-up feature-branch phases with tests and device acceptance for each capability.
+
+
+## 12. Build گام ۱ — آماده‌سازی مستقل و ثبت وضعیت (2026-11-20)
+
+### 12.1 مجوز و محدوده
+- مالک در 2026-11-20 صریحاً تأیید کرد دو فایل تحویلی Claude برای Build گام ۱ در یک شاخهٔ مستقل ثبت شوند و Build از طریق GitHub Actions اجرا شود.
+- این تأیید فقط شامل آماده‌سازی Build گام ۱ و ثبت اسناد است؛ **مجوز Merge به main، تغییر نسخهٔ baseline، تغییر branch protection/secrets/variables یا شروع گام ۲ نیست.**
+- شاخهٔ کاری: `feature/step1-build-bootstrap-2026-11-20`.
+- شاخهٔ مبنا: `feature/touchflow-feature-pack-bundle-fix-2026-11-19` در commit `05d4f4fe8aa73aec9711aeb2c6fff6a4ab4e5137`.
+- در زمان ایجاد شاخه، main روی `6c738c2214d4244913fe449ed6172db613f844bd` و `backup/native-baseline-2026-11-19` روی `d62899f0eb586a870471648fd3d77d4b8f50fb8d` بود. این شاخه‌ها نباید تغییر کنند.
+- PR #4 مستندات همچنان Open و Unmerged است؛ در این گام نباید آن را Merge یا تغییر داد.
+
+### 12.2 ورودی سورس Claude
+- فایل تحویلی: `TouchFlow-Step1-source.tar.xz`.
+- اندازهٔ فایل: 162,524 bytes.
+- SHA-256 ورودی اصلی: `8811c815e01c415e48dde1f18a4b94e35d8c87bc6c106b6e2462d6ddb623f30c`.
+- آرشیو محلی با `tar -tJf` بازبینی شد و 62 ورودی فایل/دایرکتوری داشت.
+- سورس شامل AGP `8.7.3`، Kotlin Android Plugin `2.0.21`، compile/target SDK `35`، min SDK `24` و Java/Kotlin target `17` است.
+- Gradle Wrapper داخل آرشیو وجود ندارد؛ Workflow باید Gradle `8.9` را روی runner نصب کند.
+- در `app/build.gradle.kts`، namespace برابر `com.grandmaconnect` باقی مانده و base applicationId به همراه `applicationIdSuffix = ".feature"` شناسهٔ نهایی `com.grandmaconnect.feature` را می‌سازد.
+- سه کلاس تست در مسیر `app/src/test/java/com/grandmaconnect/` قرار دارند. با شمارش annotationهای `@Test` در سورس، 13 تست JUnit دیده شد؛ این فقط شمارش ایستا است، نه اثبات اجرای تست‌ها.
+- سورس `MainActivity.kt` شامل جابه‌جایی `setNormalSystemBars()` به بعد از `setContentView` و فعال‌سازی `saveButton` در `showStoppedControls()` است. این مشاهدهٔ سورس به‌تنهایی اثبات رفع Crash یا موفقیت ذخیره روی گوشی نیست.
+- Manifest فقط `POST_NOTIFICATIONS` را به‌عنوان uses-permission ثبت می‌کند و تنظیم Accessibility همچنان `canRetrieveWindowContent="false"` دارد. نتیجهٔ نهایی باید از badging و بررسی artifact استخراج شود.
+
+### 12.3 شیوهٔ نگهداری آرشیو در Git
+- به‌دلیل اینکه مسیر اتصال GitHub در این نشست محتوای UTF-8 می‌پذیرد و انتقال مستقیم بایت‌های فایل باینری از این رابط در دسترس نبود، آرشیو اصلی به قطعات Base64 در `.step1-source/part-00 ... part-13` نگهداری می‌شود.
+- Workflow همین قطعات را به‌ترتیب نام به هم متصل می‌کند، Base64 را decode می‌کند و **SHA-256 دقیق فایل باینری بازسازی‌شده** را قبل از extract بررسی می‌کند.
+- Workflow پس از Build، خود آرشیو بازسازی‌شده را نیز به‌عنوان Artifact ذخیره می‌کند. بنابراین ورودی Build باید دقیقاً همان بایت‌های فایل تحویلی Claude باشد؛ صحت این موضوع فقط پس از موفقیت گام reassemble/hash در لاگ ثابت می‌شود.
+- این روش عمداً آرشیو را به شکل قطعات متن Base64 در Git نگه می‌دارد؛ فایل باینری `TouchFlow-Step1-source.tar.xz` در محیط runner ساخته می‌شود، نه به‌صورت blob باینری ریشهٔ branch.
+
+### 12.4 Workflow گام ۱
+- Workflow مستقل جدید: `.github/workflows/build-touchflow-step1.yml`.
+- Workflow قبلی `.github/workflows/build-touchflow-feature-pack.yml` روی شاخهٔ مبنا حفظ می‌شود و نباید overwrite شود.
+- Trigger اصلی گام ۱: Push روی فایل‌های `.step1-source/**` یا فایل Workflow جدید. اجرای خودکار با Push به شاخهٔ کاری انجام می‌شود؛ به `workflow_dispatch` وابسته نیست.
+- مراحل: بازسازی آرشیو → SHA-256 verification → extract بدون patch کردن سورس → فهرست تست‌ها → نصب JDK 17 / Gradle 8.9 / Android SDK 35 → اجرای `testDebugUnitTest` → assert تعداد تست غیرصفر → `assembleDebug` → بررسی package/label/signature → ثبت SHA-256 APK و فهرست permissionها → Upload Artifact.
+- خروجی کامل `aapt2 dump badging` در `badging.txt` ذخیره می‌شود. دستور قبلی `head` حذف شد تا خروجی کوتاه و بریده نشود.
+- فهرست permissionها برای بازبینی ثبت می‌شود؛ این Workflow در حال حاضر یک allow-list از پیش تعریف‌شده را enforce نمی‌کند. این محدودیت باید در بررسی گزارش حفظ شود.
+- Workflow شرط `canRetrieveWindowContent="false"` را کنترل می‌کند. این بررسی به معنی بررسی تمام جنبه‌های Privacy یا عملکرد سرویس نیست.
+- YAML با `yaml.safe_load` parse شد؛ این فقط بررسی parser است و جای اجرای واقعی GitHub Actions را نمی‌گیرد.
+
+### 12.5 وضعیت Build و دروازهٔ بعدی
+- هنگام ثبت این یادداشت، تغییرات و payload در شاخهٔ گام ۱ آمادهٔ commit/push هستند؛ **Run واقعی گام ۱ هنوز NOT RUN / NOT VERIFIED است** تا شمارهٔ Run و نتایج واقعی بعداً اضافه شوند.
+- پس از Push باید فقط همان Run جدید بررسی شود: نتیجهٔ reassembly/hash، تعداد تست واقعی گزارش‌شده در JUnit XML، خروجی testDebugUnitTest، assembleDebug، package، label، امضا و permission list.
+- اگر Build شکست خورد، فقط خطایی را اصلاح کن که لاگ واقعی همان Run نشان داده است؛ تست یا مرحله‌ای را حذف یا دور نزن.
+- اگر Build سبز شد، Artifact را دانلود/بررسی کن و قبل از نصب، شناسهٔ `com.grandmaconnect.feature` و امضای آن را ثبت کن. این APK جایگزین `com.grandmaconnect.preview` نیست؛ نسخهٔ اصلی را برای نصب این APK حذف نکن.
+- تست واقعی Save روی Galaxy A14 برای APK قبلی همچنان `NOT YET DONE` است. این دروازه با موفقیت Build جدید خودکار بسته نمی‌شود.
+- گام ۲ (ویرایشگر ماکرو) فقط پس از سبزشدن Build گام ۱ و بازبینی گزارش آن شروع می‌شود.
+- آخرین وضعیت را با branch، commit، workflow run URL/ID، نتیجهٔ دقیق تست، Artifact ID و SHA-256 APK در همین فایل ثبت کن؛ از نوشتن «سبز» بدون مدرک Run خودداری کن.
