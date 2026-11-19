@@ -355,9 +355,9 @@ Next:
 Status: IN PROGRESS (آمادهٔ CI؛ Build Android هنوز منتظر نتیجهٔ GitHub Actions)
 Branch: `feature/touchflow-first-feature-pack-2026-11-19`
 Source archive: `TouchFlowFeaturePack-source.tar.xz`
-Archive SHA-256: `8d58869b335a593aff7b4f361858bf3a9294ad43f1a039ea7f77404f808d6e0c`
+Archive SHA-256: `03bac4a8857e5c08ad2c4e72b22f8db33b365ab03637c2365d6e61387a319fd1`
 Archive size: 25,088 bytes
-Base64 segments: 14 × up to 2,400 characters
+Git path: `.touchflow-feature/source.tar.xz` (binary blob; no base64 part files)
 Local checks:
 - `MacroSplitRulesTest: 10 assertions passed`
 - تمام XMLهای Android با XML parser خوانده شدند.
@@ -366,3 +366,15 @@ Local checks:
 - Preview build باید package id جداگانهٔ `com.grandmaconnect.feature` داشته باشد؛ APK baseline نباید جایگزین شود.
 
 **قانون تداوم:** اگر چت قطع شد، از همین فایل و همین شاخه ادامه بده؛ ابتدا نتیجهٔ آخرین Actions run را بررسی کن، نه اینکه از ابتدا پیاده‌سازی را شروع کنی.
+
+
+### 2026-11-19 — بستهٔ نهایی برای Build آزمایشی آماده شد
+Status: IN PROGRESS (منتظر ثبت archive/workflow و نتیجهٔ CI)
+- Archive نهایی پس از آخرین تغییرهای Manifest و بررسی جهت صفحه بازسازی شد.
+- SHA-256 نهایی: `03bac4a8857e5c08ad2c4e72b22f8db33b365ab03637c2365d6e61387a319fd1`
+- حجم آرشیو: 25,156 bytes.
+- Workflow مخصوص شاخهٔ feature آماده شده: `.github/workflows/build-touchflow-feature-pack.yml`.
+- Workflow قرار است `testDebugUnitTest assembleDebug` را اجرا کند و package جداگانهٔ `com.grandmaconnect.feature` را با label `TouchFlow Feature Preview` و signature معتبر بررسی کند.
+- آخرین تست محلی pure Kotlin: 10/10 assertion passed.
+- آخرین بررسی XML: همهٔ resourceهای XML قابل parse هستند.
+- Android Build و APK هنوز NOT VERIFIED تا دریافت نتیجهٔ Actions.
