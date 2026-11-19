@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - '.step1-source/**'
+      - 'TouchFlow-Step1-source.tar.xz'
       - '.github/workflows/build-touchflow-step1.yml'
 
 permissions:
@@ -12,7 +12,7 @@ permissions:
 
 env:
   ARCHIVE: TouchFlow-Step1-source.tar.xz
-  # SHA-256 of the source archive reconstructed from .step1-source/part-* fragments.
+  # SHA-256 of the source archive uploaded at the repository root.
   ARCHIVE_SHA256: 8811c815e01c415e48dde1f18a4b94e35d8c87bc6c106b6e2462d6ddb623f30c
   PROJECT_DIR: GrandmaConnectNative
   EXPECTED_PACKAGE: com.grandmaconnect.feature
@@ -26,10 +26,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Reassemble and verify source archive
+      - name: Verify source archive hash
         run: |
-          test -d .step1-source
-          cat .step1-source/part-* | base64 --decode > "$ARCHIVE"
           test -s "$ARCHIVE"
           echo "$ARCHIVE_SHA256  $ARCHIVE" | sha256sum -c -
 
