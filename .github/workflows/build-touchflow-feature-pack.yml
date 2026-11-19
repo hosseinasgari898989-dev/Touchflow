@@ -1,0 +1,101 @@
+name: Build TouchFlow Feature Pack Preview
+
+on:
+  push:
+    branches:
+      - feature/touchflow-first-feature-pack-2026-11-19
+    paths:
+      - '.touchflow-feature/READY'
+      - '.touchflow-feature/part-*'
+      - '.github/workflows/build-touchflow-feature-pack.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build-touchflow-feature-pack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Assemble and verify native source archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s .touchflow-feature/READY
+          grep -Fx 'name=TouchFlowFeaturePack-source.tar.xz' .touchflow-feature/READY
+          grep -Fx 'sha256=8288df571300bccf54489bbb82289991d3b2a1a59a2ca4014b3859055ded8532' .touchflow-feature/READY
+          grep -Fx 'parts=9' .touchflow-feature/READY
+          test "$(find .touchflow-feature -maxdepth 1 -type f -name 'part-*' | wc -l)" -eq 9
+          cat .touchflow-feature/part-* > /tmp/TouchFlowFeaturePack-source.tar.xz.b64
+          test "$(wc -c < /tmp/TouchFlowFeaturePack-source.tar.xz.b64)" -eq 33836
+          base64 --decode /tmp/TouchFlowFeaturePack-source.tar.xz.b64 > /tmp/TouchFlowFeaturePack-source.tar.xz
+          echo '8288df571300bccf54489bbb82289991d3b2a1a59a2ca4014b3859055ded8532  /tmp/TouchFlowFeaturePack-source.tar.xz' | sha256sum -c -
+          tar -tJf /tmp/TouchFlowFeaturePack-source.tar.xz >/dev/null
+          mkdir -p /tmp/touchflow-source
+          tar -xJf /tmp/TouchFlowFeaturePack-source.tar.xz -C /tmp/touchflow-source
+          APP=/tmp/touchflow-source/GrandmaConnectNative/app
+          test -f "$APP/src/main/java/com/grandmaconnect/MainActivity.kt"
+          test -f "$APP/src/main/java/com/grandmaconnect/MacroWidget.kt"
+          test -f "$APP/src/main/java/com/grandmaconnect/MacroSplitRules.kt"
+          test -f "$APP/src/test/java/com/grandmaconnect/MacroSplitRulesTest.kt"
+          test -f "$APP/src/main/AndroidManifest.xml"
+
+      - name: Isolate preview app identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP=/tmp/touchflow-source/GrandmaConnectNative/app
+          sed -i 's/applicationIdSuffix = ".debug"/applicationIdSuffix = ".feature"/' "$APP/build.gradle.kts"
+          sed -i 's/versionNameSuffix = "-debug"/versionNameSuffix = "-feature"/' "$APP/build.gradle.kts"
+          sed -i 's#<string name="app_name">TouchFlow</string>#<string name="app_name">TouchFlow Feature Preview</string>#' "$APP/src/main/res/values/strings.xml"
+          grep -F 'applicationIdSuffix = ".feature"' "$APP/build.gradle.kts"
+          grep -F 'versionNameSuffix = "-feature"' "$APP/build.gradle.kts"
+          grep -F '<string name="app_name">TouchFlow Feature Preview</string>' "$APP/src/main/res/values/strings.xml"
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle 8.9
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Set up Android SDK 35
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
+
+      - name: Run unit tests and build preview APK
+        run: gradle --no-daemon --stacktrace -p /tmp/touchflow-source/GrandmaConnectNative testDebugUnitTest assembleDebug
+
+      - name: Verify APK package, label and signature
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK=/tmp/touchflow-source/GrandmaConnectNative/app/build/outputs/apk/debug/app-debug.apk
+          test -s "$APK"
+          $ANDROID_HOME/build-tools/35.0.0/aapt dump badging "$APK" | grep -F "package: name='com.grandmaconnect.feature'"
+          $ANDROID_HOME/build-tools/35.0.0/aapt dump badging "$APK" | grep -F "application-label:'TouchFlow Feature Preview'"
+          $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose "$APK"
+
+      - name: Upload TouchFlow feature preview APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: touchflow-feature-pack-preview-apk
+          path: /tmp/touchflow-source/GrandmaConnectNative/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload exact source archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: touchflow-feature-pack-source
+          path: /tmp/TouchFlowFeaturePack-source.tar.xz
+          if-no-files-found: error
+          retention-days: 30
