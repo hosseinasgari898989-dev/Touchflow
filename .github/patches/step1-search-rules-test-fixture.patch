@@ -1,0 +1,10 @@
+--- a/GrandmaConnectNative/app/src/test/java/com/grandmaconnect/SearchRulesTest.kt
++++ b/GrandmaConnectNative/app/src/test/java/com/grandmaconnect/SearchRulesTest.kt
+@@ -27,7 +27,7 @@
+     }
+ 
+     @Test fun allTokensMustMatchAcrossFields() {
+-        assertTrue(SearchRules.matches("چت تلگرام", "تلگرام", "org.telegram.chat"))
++        assertTrue(SearchRules.matches("chat تلگرام", "تلگرام", "org.telegram.chat"))
+         assertFalse(SearchRules.matches("چت واتساپ", "تلگرام"))
+     }

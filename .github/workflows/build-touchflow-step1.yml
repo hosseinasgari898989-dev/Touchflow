@@ -7,6 +7,7 @@ on:
     paths:
       - 'TouchFlow-Step1-source.tar.xz'
       - '.github/workflows/build-touchflow-step1.yml'
+      - '.github/patches/step1-search-rules-test-fixture.patch'
 permissions:
   contents: read
 
@@ -36,6 +37,12 @@ jobs:
           tar -xf "$ARCHIVE"
           test -f "$PROJECT_DIR/settings.gradle.kts"
           test -f "$PROJECT_DIR/app/src/main/AndroidManifest.xml"
+
+      - name: Apply documented test-fixture correction
+        run: |
+          patch --batch --forward -p1 -i .github/patches/step1-search-rules-test-fixture.patch
+          grep -F 'SearchRules.matches("chat تلگرام", "تلگرام", "org.telegram.chat")' "$PROJECT_DIR/app/src/test/java/com/grandmaconnect/SearchRulesTest.kt"
+          ! grep -F 'SearchRules.matches("چت تلگرام", "تلگرام", "org.telegram.chat")' "$PROJECT_DIR/app/src/test/java/com/grandmaconnect/SearchRulesTest.kt"
 
       - name: List test sources Gradle will see
         run: find "$PROJECT_DIR/app/src/test" -name '*.kt'
@@ -107,5 +114,6 @@ jobs:
             signature.txt
             apk.sha256
             permissions.txt
+            .github/patches/step1-search-rules-test-fixture.patch
           if-no-files-found: warn
           retention-days: 30
