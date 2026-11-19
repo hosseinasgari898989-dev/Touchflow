@@ -498,3 +498,91 @@ Status: IN PROGRESS
 - در آخرین بررسی Gradle 8.9 در حال آماده‌سازی بود؛ Android SDK و تست/Build هنوز pending بودند.
 - Artifact APK هنوز ایجاد نشده است.
 - تعداد milestoneهای اصلی باقیمانده: 5؛ milestone شمارهٔ 1 (CI retest) اکنون در حال اجراست؛ پس از موفقیت آن 4 milestone اصلی دیگر باقی می‌ماند.
+
+
+---
+
+# نقطهٔ توقف پایدار — 2026-11-19 — CI موفق و APK آزمایشی تأیید شد
+
+## قانون دائمی تداوم پروژه (درخواست مالک)
+- این فایل مرجع اصلی انتقال وضعیت به گفت‌وگوهای بعدی است.
+- **هر کار معنادار باید در همین فایل ثبت شود:** تغییر فایل/کد، commit، اجرای workflow، نتیجهٔ تست، خطا و علت آن، تصمیم معماری، لینک artifact، هش فایل، بررسی شاخه‌ها و کارهای باقی‌مانده.
+- ثبت فقط نتیجهٔ موفق کافی نیست؛ کارهای ناموفق، محدودیت‌ها، موردهای NOT FOUND و چیزهایی که هنوز روی گوشی آزمایش نشده‌اند نیز ثبت شوند.
+- بعد از هر به‌روزرسانی این فایل، محتوای آن از GitHub دوباره خوانده شود تا ذخیره‌شدن و SHA جدید تأیید شود.
+- هر گفت‌وگوی جدید باید قبل از هر اقدام، همین فایل را از آخرین commit شاخهٔ فعال بخواند و از نقطهٔ توقف ادامه دهد؛ از مالک نخواهد سابقه را دوباره توضیح دهد.
+- هرگز token، secret، کلید امضا یا مقدار محرمانه در این فایل نوشته نشود.
+- این فایل فعلاً روی شاخهٔ feature نگهداری می‌شود؛ هنوز به main merge نشده است.
+
+## نتیجهٔ CI اصلاحی
+- Workflow run: [44602552416](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44602552416)
+- نتیجهٔ نهایی: `completed / success`.
+- Run بر اساس commit سورس `8f4092e077eaa82c196d6b8403201b3ed3df72a8` اجرا شد.
+- Job ID: `135837527816`; تمام 11 مرحلهٔ اصلی/پس‌کار موفق شدند.
+- بازیابی آرشیو روی Runner:
+  - 9 قطعه به هم متصل شدند.
+  - SHA-256: `117becdf5b48a585303c1a9cc4d2648038795abdcada00639f2c4b5a7989a4d0`
+  - `sha256sum -c`: OK.
+  - فهرست و استخراج tar.xz و وجود فایل‌های کلیدی سورس: SUCCESS.
+- تست و ساخت:
+  - فرمان: `gradle --no-daemon --stacktrace -p /tmp/touchflow-source/GrandmaConnectNative testDebugUnitTest assembleDebug`
+  - `testDebugUnitTest`: SUCCESS.
+  - `assembleDebug`: SUCCESS.
+  - خروجی ثبت‌شده: `BUILD SUCCESSFUL in 37s` (39 actionable tasks).
+- اعتبارسنجی APK از لاگ CI:
+  - package: `com.grandmaconnect.feature`
+  - label: `TouchFlow Feature Preview`
+  - versionName: `0.1.0-alpha-feature`
+  - compile SDK: 35
+  - `apksigner verify --verbose`: موفق؛ v2=true، یک signer. v1/v3/v3.1/v4 فعال نیستند؛ این مورد خطا نیست چون امضای v2 معتبر گزارش شد.
+- هشدارهای غیرمسدودکننده:
+  - چند API قدیمی در `MainActivity.kt` مثل `onBackPressed` و رنگ system barها deprecated هستند.
+  - هشدارهای deprecation از GitHub Actions دربارهٔ setup-java@v4 و Node 20 نیز ظاهر شدند.
+  - هیچ‌کدام باعث شکست Build نشدند؛ برای پاک‌سازی در کار مستقل آینده ثبت شوند.
+
+## آرتیفکت‌های CI و بررسی فایل واقعی
+- APK artifact:
+  - [دانلود از GitHub Actions](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44602552416/artifacts/14569201389)
+  - artifact ID: `14569201389`
+  - نام: `touchflow-feature-pack-preview-apk`
+  - ZIP size: 889,042 bytes؛ ZIP SHA-256: `bc0067fe85065257b197acfe2b085920564aabaf0968f68a0f3f3bbe9bbd4a2b`
+  - APK استخراج‌شده: 898,093 bytes
+  - SHA-256 فایل APK: `4783947f21c77e2d804f4901b9079645a261510cce00fb933f3f2fc8384e767e`
+  - فایل محلی در محیط ساخت این گفت‌وگو: `/mnt/data/TouchFlow-Feature-Preview.apk` (فقط مسیر موقت؛ لینک Artifact GitHub مرجع پایدار است).
+- سورس artifact:
+  - [دانلود از GitHub Actions](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44602552416/artifacts/14569031661)
+  - artifact ID: `14569031661`
+  - نام: `touchflow-feature-pack-source`
+  - ZIP size: 25,576 bytes؛ ZIP SHA-256: `f3c18d099046efcabf7596eeea125f63af504a5030912d965dd16da3ab113102`
+  - فایل tar.xz داخل آن: 25,384 bytes؛ SHA-256 آن دوباره از فایل دانلودشده محاسبه و با مقدار مورد انتظار برابر شد: `117becdf5b48a585303c1a9cc4d2648038795abdcada00639f2c4b5a7989a4d0`.
+- هر دو artifact از GitHub دانلود شدند؛ ZIPها بدون خطا باز شدند و وجود APK و فایل سورس داخلشان بررسی شد.
+- تاریخ انقضای اعلام‌شده برای هر دو artifact: 2026-12-19؛ لازم است پیش از انقضا در صورت نیاز به آرشیو بلندمدت نگهداری شوند.
+
+## وضعیت شاخه و ریسک قبل از PR
+- شاخهٔ فعال: `feature/touchflow-feature-pack-bundle-fix-2026-11-19`
+- آخرین commit شاخه هنگام این checkpoint: `1ef0707049819b9ae5946848ad5e36516b08f49a` (commit مستندات قبلی؛ run بالا از commit سورس پیشین ساخته شده است).
+- main هنگام بررسی: `6c738c2214d4244913fe449ed6172db613f844bd`؛ در این کار تغییر نکرد.
+- merge-base شاخه و main: `d62899f0eb586a870471648fd3d77d4b8f50fb8d`.
+- مقایسهٔ فعلی: شاخه 44 commit جلو و 2 commit عقب main است. اختلاف عقب‌ماندگی از دو commit مستنداتی جدید main است؛ قبل از PR باید diff و احتمال conflict بررسی شود. Rebase/merge انجام نشده است.
+- **یافتهٔ مسدودکنندهٔ PR:** فایل `.github/workflows/build-android.yml` در شاخهٔ feature با نسخهٔ main متفاوت است:
+  - نسخهٔ main روی push به `main` و تغییر `GrandmaConnectNative-source.zip` trigger می‌شود.
+  - نسخهٔ شاخهٔ feature روی `feature/expanded-capture-settings-2026-11-19` و فایل‌های `.source-v2/READY` trigger می‌شود.
+  - ادغام مستقیم این تغییر، رفتار build اصلی main را عوض/غیرفعال می‌کند. این تغییر برای feature pack فعلی لازم نیست؛ باید پیش از PR نسخهٔ workflow اصلی حفظ/بازگردانده شود یا با بررسی مالک جداگانه تصمیم‌گیری شود.
+- شاخه همچنین شامل تاریخچه و فایل‌های جانبی از کارهای قبلی است: `.source-v2/`, `.touchflow-simple/`, `.github/workflows/build-touchflow-simple.yml`، و تغییرات expanded-capture/simple-runner. قبل از ساخت PR باید دامنهٔ دقیق این موارد بررسی شود؛ هیچ‌کدام نباید ناخواسته حذف یا ادغام شوند.
+- PR هنوز ساخته نشده و هیچ چیزی به main merge نشده است.
+- baseline APK در مسیر خودش دست‌نخورده باقی مانده؛ APK جدید شناسهٔ جداگانه دارد.
+
+## یافتهٔ مستنداتی در خود سورس
+- `README-fa.md` هنوز می‌گوید ذخیره به Schema 2 می‌رود و فقط `LAUNCH_APP` و `GO_HOME` وجود دارند.
+- کد فعلی `MacroModels.kt`، Schema 3 و enum شامل `GO_BACK` دارد.
+- `TEST-CHECKLIST-fa.md` نیز چند مورد قدیمی را با Schema 2 توضیح می‌دهد و با قابلیت فعلی کامل هم‌گام نیست.
+- این دو سند باید قبل از Release/PR با رفتار واقعی هماهنگ شوند؛ فعلاً APK صرفاً build موفق دارد، نه تأیید کاربری.
+
+## تعداد milestoneهای اصلی باقی‌مانده
+1. **آزمایش واقعی Galaxy A14 / Android 13:** نصب APK آزمایشی با package جدا؛ بررسی ابعاد/RTL/فارسی، ضبط، درج برنامه در مرز امن gesture، Launch App، GO_BACK/GO_HOME، Split/Unsplit و حفظ داده، ویجت با mapping مستقل، auto-close، notification stop و orientation/system bars. این مرحله هنوز انجام نشده و CI جای آن را نمی‌گیرد.
+2. **بازبینی محدودهٔ PR و اصلاح اسناد/Workflow:** رفع ناسازگاری README/چک‌لیست با Schema 3 و GO_BACK؛ بررسی همهٔ تغییرات شاخه؛ حفظ trigger اصلی `build-android.yml`؛ بررسی دو commit جدید main و conflictها؛ سپس ساخت PR. تا تأیید صریح مالک merge انجام نشود.
+
+## دستور شروع برای گفت‌وگوی بعدی
+1. ابتدا این فایل را از آخرین commit شاخهٔ feature بخوان.
+2. run موفق `44602552416` و artifactها را دوباره اجرا نکن؛ نتیجه در همین فایل ثبت شده است.
+3. ادامه را با تست فیزیکی APK روی Galaxy A14 شروع کن. APK را می‌توان از Artifact لینک بالا گرفت؛ نصب باید کنار baseline باقی بماند، چون package آن `com.grandmaconnect.feature` است.
+4. بعد از دریافت نتایج دستگاه، موارد را ثبت کن و فقط سپس وارد اصلاح اسناد، scope review و PR شو.
