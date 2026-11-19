@@ -854,3 +854,44 @@ Trigger commit: `aeceab7cb94eb5c00a156a3520433b382206de66`
 - Regression checks remain: `MacroSplitRulesTest: 10 assertions passed`; save-state source assertions 4 passed.
 - No APK was uploaded by failed run; no Android build step was reached.
 - Next: update the READY marker once to trigger a clean run with the corrected helper, then inspect the patch step, Gradle tests/build, APK identity/signature and artifact before asking the owner to retest.
+
+### 2026-11-20 — اصلاح دکمه ذخیره ماکرو: Build موفق
+Status: READY FOR DEVICE RETEST (save UI fix built; real-device save action not yet verified)
+Branch: `feature/touchflow-feature-pack-bundle-fix-2026-11-19`
+Backup before this change: `backup/touchflow-before-save-ui-fix-2026-11-20`
+Successful run: [44619393523](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44619393523)
+Trigger commit: `bcbe99d143ca8e258e2e853913627ebad1505a72`
+Job ID: `135896677177`
+Result: `completed / success`
+
+**Final CI validation**
+- Source archive SHA-lock verification: SUCCESS (`117becdf5b48a585303c1a9cc4d2648038795abdcada00639f2c4b5a7989a4d0`).
+- Startup crash correction and save-button correction transformer: SUCCESS.
+- JDK 17, Gradle 8.9, Android SDK 35 setup: SUCCESS.
+- `testDebugUnitTest assembleDebug`: SUCCESS; `BUILD SUCCESSFUL in 41s`.
+- Package `com.grandmaconnect.feature`, label `TouchFlow Feature Preview`, versionName `0.1.0-alpha-feature`: VERIFIED.
+- APK signature verification: SUCCESS; APK Signature Scheme V2: true.
+- All workflow steps completed successfully.
+
+**New artifacts**
+- APK artifact: [14576832194](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44619393523/artifacts/14576832194)
+  - Artifact ZIP SHA-256: `4a9fb5ad76b8b1ce0604bc1ffea4a4b74d700000ac1a3ac7e34f95f7d0aa85e2`.
+  - Extracted APK size: 898,109 bytes.
+  - Extracted APK SHA-256: `07d08a832dc4bbdbe42e15dd8bb81217c17de17d33a263229f1f0f46316a3196`.
+- Patched source artifact: [14575158079](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44619393523/artifacts/14575158079)
+  - Artifact ZIP SHA-256: `bcda985f6fc11b6915552b5127225bd8f6d2456f67360c6ff21e1a5dbc6c2c05`.
+  - Embedded source tar.xz SHA-256: `34d1369c69861e9d08a0b4c98c14cfa846dd0de202b87c608ba049a082df9151`.
+- Both artifact ZIPs were downloaded and their computed SHA-256 hashes match the GitHub artifact digests.
+- Original and patched source tar archives both contain 23 files; exactly one file differs:
+  `GrandmaConnectNative/app/src/main/java/com/grandmaconnect/MainActivity.kt`.
+- Verified inserted line:
+  `saveButton.isEnabled = capturedGroups.isNotEmpty()` inside `showStoppedControls()`, immediately after visibility is set. Thus a non-empty recording enables Save; empty recording keeps it unavailable.
+
+**Tests and remaining acceptance**
+- `MacroSplitRulesTest: 10 assertions passed`.
+- Save-state source assertions: 4 passed.
+- Prior CI run `44619150847` failed only because a Python patch string had a double-escaped newline; this was corrected, and successful run `44619393523` confirms the actual patch was applied.
+- Physical-device retest of saving: NOT YET DONE.
+- Next device test only: replace prior Feature Preview if Android reports signature conflict; install this APK; record 2–3 taps; stop; confirm Save Macro is enabled; save; confirm the macro appears in the list. Do not move to macro management details or widget playback until this passes.
+- Baseline/other app is untouched. No PR or merge created.
+- The absence of a Full Screen settings toggle and the difference between immersive in-app capture versus cross-app/device-wide touch capture remain separate scope decisions; no changes to those behaviors were made in this patch.
