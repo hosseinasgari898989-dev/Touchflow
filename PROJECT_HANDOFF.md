@@ -408,3 +408,19 @@ Status: DONE (integrity check); IN PROGRESS (Android CI pending)
 - GitHub blob نهایی `part-05`: `00329522e7c4bb5b38a8106e7b74321e8e84a706`.
 - GitHub blob نهایی `part-07`: `ca5e5385d988b52dcb31598b59fb33d06d434c14`.
 - اکنون می‌توان READY و workflow را اضافه کرد و CI را اجرا کرد.
+
+
+### 2026-11-19 — اولین اجرای CI بستهٔ قابلیت‌ها
+Status: IN PROGRESS
+- Workflow: `Build TouchFlow Feature Pack Preview`.
+- Run: [44600591255](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44600591255).
+- Head commit: `62505409c4264a05abe1d9d0ec82004801bdbfa3`.
+- مرحلهٔ «Assemble and verify native source archive»: SUCCESS.
+  - نام/تعداد ۹ قطعه و اندازهٔ Base64 برابر 33,836 بررسی شدند.
+  - SHA-256 آرشیو با مقدار ثبت‌شده تطبیق کرد.
+  - آرشیو xz/tar قابل فهرست‌کردن و استخراج بود.
+  - فایل‌های MainActivity، MacroWidget، MacroSplitRules، JUnit test و Manifest وجود داشتند.
+- مرحلهٔ جداسازی package هویت آزمایشی: SUCCESS؛ `com.grandmaconnect.feature` و label `TouchFlow Feature Preview`.
+- JDK 17: SUCCESS.
+- در آخرین بررسی، آماده‌سازی Gradle 8.9 در حال اجرا بود؛ Android SDK، unit tests، assemble و signature validation هنوز PENDING بودند.
+- هنوز APK جدید ساخته نشده و نتیجهٔ نهایی Build NOT VERIFIED است.
