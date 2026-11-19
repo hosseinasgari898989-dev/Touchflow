@@ -91,5 +91,7 @@ Update after every material decision, branch, PR, commit, test or failure. Mark 
 - Workflow report fix in the prepared draft: retain full `aapt2 dump badging` output rather than truncating it through `head`. Permissions are captured for review but an allow-list is not enforced.
 - Static source inspection found 13 `@Test` annotations across the three correctly placed test classes. This is not a runtime test result.
 - Main remains `6c738c2214d4244913fe449ed6172db613f844bd`; `backup/native-baseline-2026-11-19` remains `d62899f0eb586a870471648fd3d77d4b8f50fb8d`; PR #4 remains open/unmerged. Verify these before any future write.
-- Build status at this addendum: **BLOCKED BEFORE RUN — archive/workflow not yet committed; NOT RUN / NOT VERIFIED**. See `PROJECT_HANDOFF.md`, section 12, for complete lineage, test gates, source details and next steps.
+- Build status at this addendum: **BLOCKED BEFORE RUN — binary archive not uploaded; pending workflow not activated; NOT RUN / NOT VERIFIED**. See `PROJECT_HANDOFF.md`, section 12, especially 12.3–12.6, for the exact blocker and resume steps.
 - Keep `Save on-device retest = NOT YET DONE` until the owner confirms it on the target Galaxy A14. Build success alone does not close this device test gate.
+
+- Immediate next step: upload `TouchFlow-Step1-source.tar.xz` (162,524 bytes) to the root of this branch; verify SHA-256 exactly equals `8811c815e01c415e48dde1f18a4b94e35d8c87bc6c106b6e2462d6ddb623f30c`; then move `docs/ci/build-touchflow-step1.yml.pending` into `.github/workflows/build-touchflow-step1.yml` and push only this branch.
