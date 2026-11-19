@@ -149,3 +149,12 @@ Update after every material decision, branch, PR, commit, test or failure. Mark 
 - Main was read at `6c738c2214d4244913fe449ed6172db613f844bd` before this work; no write operation targeted `main`. Backup branches were not targeted.
 - R1 status: source archive hash verified locally; branch created; CI workflow staged; **archive upload pending; R1 Build NOT RUN; R1 JUnit NOT RUN; device NOT VERIFIED**.
 - Next owner action: upload the already-provided `TouchFlow-R1-source.tar.xz` unchanged to the repository root on branch `feature/touchflow-r1-recording-actions-2026-11-20`. This single push triggers the R1 CI. Then inspect the run and its artifact before installing or accepting on device.
+
+
+## R1 staging workflow probe — 2026-11-20
+
+- Initial workflow-only commit triggered Run [44640726096](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44640726096) before the archive was present.
+- Job `135970795549` failed at `Verify archive hash`; extraction, JUnit, assemble and APK checks were skipped. This is an expected staging/input-missing failure, NOT a source compile/test failure.
+- Workflow was then narrowed so the only push path trigger is `TouchFlow-R1-source.tar.xz`; no manual dispatch trigger is configured. The current workflow file last changed in commit `0b3d48f7fefd34dd25af8e9b26f23d881cd72218`.
+- Current R1 branch head after recording this state: pending this documentation commit. Main remains `6c738c2214d4244913fe449ed6172db613f844bd`; no main or backup write was made.
+- Next and only owner action: upload the exact local archive `TouchFlow-R1-source.tar.xz` to the root of the R1 branch. Verify GitHub reports the upload committed to `feature/touchflow-r1-recording-actions-2026-11-20`. That push will start a fresh CI run.
