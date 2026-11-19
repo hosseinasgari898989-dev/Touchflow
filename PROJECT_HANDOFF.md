@@ -979,25 +979,24 @@ Latest confirmed save-fix APK:
 - سورس `MainActivity.kt` شامل جابه‌جایی `setNormalSystemBars()` به بعد از `setContentView` و فعال‌سازی `saveButton` در `showStoppedControls()` است. این مشاهدهٔ سورس به‌تنهایی اثبات رفع Crash یا موفقیت ذخیره روی گوشی نیست.
 - Manifest فقط `POST_NOTIFICATIONS` را به‌عنوان uses-permission ثبت می‌کند و تنظیم Accessibility همچنان `canRetrieveWindowContent="false"` دارد. نتیجهٔ نهایی باید از badging و بررسی artifact استخراج شود.
 
-### 12.3 شیوهٔ نگهداری آرشیو در Git
-- به‌دلیل اینکه مسیر اتصال GitHub در این نشست محتوای UTF-8 می‌پذیرد و انتقال مستقیم بایت‌های فایل باینری از این رابط در دسترس نبود، آرشیو اصلی به قطعات Base64 در `.step1-source/part-00 ... part-13` نگهداری می‌شود.
-- Workflow همین قطعات را به‌ترتیب نام به هم متصل می‌کند، Base64 را decode می‌کند و **SHA-256 دقیق فایل باینری بازسازی‌شده** را قبل از extract بررسی می‌کند.
-- Workflow پس از Build، خود آرشیو بازسازی‌شده را نیز به‌عنوان Artifact ذخیره می‌کند. بنابراین ورودی Build باید دقیقاً همان بایت‌های فایل تحویلی Claude باشد؛ صحت این موضوع فقط پس از موفقیت گام reassemble/hash در لاگ ثابت می‌شود.
-- این روش عمداً آرشیو را به شکل قطعات متن Base64 در Git نگه می‌دارد؛ فایل باینری `TouchFlow-Step1-source.tar.xz` در محیط runner ساخته می‌شود، نه به‌صورت blob باینری ریشهٔ branch.
+### 12.3 وضعیت ثبت آرشیو در Git — مانع فعلی
+- آرشیو در همین نشست از مسیر محلی `/mnt/data/TouchFlow-Step1-source.tar.xz` بررسی شد؛ اندازهٔ فایل 162,524 bytes و SHA-256 آن مطابق گزارش Claude است.
+- تلاش برای ثبت فایل از طریق GitHub connector به محدودیت رسید: عملیات نوشتن فایل در این اتصال فقط متن UTF-8 را می‌پذیرد و عملیات upload بایت‌های فایل باینری/مسیر محلی ارائه نمی‌کند.
+- **آرشیو هنوز در شاخهٔ GitHub ثبت نشده است. هیچ قطعهٔ `.step1-source/part-*` در شاخه ایجاد نشده و نباید فرض شود payload در GitHub موجود است.**
+- ایدهٔ قطعه‌قطعه‌کردن Base64 فقط به‌عنوان راهکار بررسی شد؛ چون انتقال دقیق همهٔ قطعات از مسیر فعلی قابل اتکا نبود، آن را commit نکردیم. از قطعات ناقص یا hash نادرست استفاده نکن.
+- راه امن ادامه: فایل باینری اصلی با GitHub web upload یا یک مسیر Git binary-capable روی همین شاخه ثبت شود؛ سپس SHA-256 فایل داخل GitHub با مقدار `8811c815e01c415e48dde1f18a4b94e35d8c87bc6c106b6e2462d6ddb623f30c` تطبیق داده شود. اگر فقط امکان متن وجود داشت، ابتدا یک روش chunking مستقل و قابل بازتولید با تأیید hash طراحی و آزمایش شود؛ هرگز از روی حافظه یا دستی Base64 نساز.
 
-### 12.4 Workflow گام ۱
-- Workflow مستقل جدید: `.github/workflows/build-touchflow-step1.yml`.
-- Workflow قبلی `.github/workflows/build-touchflow-feature-pack.yml` روی شاخهٔ مبنا حفظ می‌شود و نباید overwrite شود.
-- Trigger اصلی گام ۱: Push روی فایل‌های `.step1-source/**` یا فایل Workflow جدید. اجرای خودکار با Push به شاخهٔ کاری انجام می‌شود؛ به `workflow_dispatch` وابسته نیست.
-- مراحل: بازسازی آرشیو → SHA-256 verification → extract بدون patch کردن سورس → فهرست تست‌ها → نصب JDK 17 / Gradle 8.9 / Android SDK 35 → اجرای `testDebugUnitTest` → assert تعداد تست غیرصفر → `assembleDebug` → بررسی package/label/signature → ثبت SHA-256 APK و فهرست permissionها → Upload Artifact.
-- خروجی کامل `aapt2 dump badging` در `badging.txt` ذخیره می‌شود. دستور قبلی `head` حذف شد تا خروجی کوتاه و بریده نشود.
-- فهرست permissionها برای بازبینی ثبت می‌شود؛ این Workflow در حال حاضر یک allow-list از پیش تعریف‌شده را enforce نمی‌کند. این محدودیت باید در بررسی گزارش حفظ شود.
-- Workflow شرط `canRetrieveWindowContent="false"` را کنترل می‌کند. این بررسی به معنی بررسی تمام جنبه‌های Privacy یا عملکرد سرویس نیست.
-- YAML با `yaml.safe_load` parse شد؛ این فقط بررسی parser است و جای اجرای واقعی GitHub Actions را نمی‌گیرد.
+### 12.4 وضعیت Workflow گام ۱
+- فایل تحویلی Claude در این نشست خوانده و از نظر YAML با `yaml.safe_load` parse شد. سپس نسخهٔ مستقل آن با نام پیشنهادی `.github/workflows/build-touchflow-step1.yml` آماده شد تا Workflow قبلی `.github/workflows/build-touchflow-feature-pack.yml` overwrite نشود.
+- نسخهٔ جدید، در فایل محلی این نشست، اصلاح گزارش‌گیری `aapt2 dump badging` را دارد: خروجی کامل در `badging.txt` نوشته می‌شود و با `head` قطع نمی‌شود.
+- نسخهٔ جدید permissionها را برای بازبینی ثبت می‌کند، اما allow-list را enforce نمی‌کند؛ شرط `canRetrieveWindowContent="false"` نیز در آن وجود دارد.
+- **Workflow جدید هنوز در branch ثبت نشده و اجرا نشده است.** علت: پیش از قرار دادن Workflow و فعال‌کردن Push trigger باید فایل باینری سورس به‌طور کامل و با hash درست در branch موجود باشد.
+- نسخهٔ قبلی Workflow در شاخهٔ مبنا دست‌نخورده است. فایل جدید نباید آن را overwrite یا triggerهایش را تغییر دهد.
 
 ### 12.5 وضعیت Build و دروازهٔ بعدی
-- هنگام ثبت این یادداشت، تغییرات و payload در شاخهٔ گام ۱ آمادهٔ commit/push هستند؛ **Run واقعی گام ۱ هنوز NOT RUN / NOT VERIFIED است** تا شمارهٔ Run و نتایج واقعی بعداً اضافه شوند.
-- پس از Push باید فقط همان Run جدید بررسی شود: نتیجهٔ reassembly/hash، تعداد تست واقعی گزارش‌شده در JUnit XML، خروجی testDebugUnitTest، assembleDebug، package، label، امضا و permission list.
+- شاخهٔ گام ۱ و تغییرات مستندات در GitHub ایجاد شده‌اند؛ اما فایل سورس باینری و Workflow جدید هنوز به این شاخه اضافه نشده‌اند. بنابراین **هیچ Push دارای ورودی Build انجام نشده و Run واقعی گام ۱ NOT RUN / NOT VERIFIED است.**
+- Build را فقط پس از آپلود کامل فایل باینری و Workflow مستقل اجرا کن. قبل از اجرا، SHA-256 فایل روی GitHub را با مقدار ثبت‌شده تطبیق بده.
+- پس از Run باید نتیجهٔ source hash، تعداد تست واقعی JUnit XML، testDebugUnitTest، assembleDebug، package، label، امضا و permission list بررسی شوند.
 - اگر Build شکست خورد، فقط خطایی را اصلاح کن که لاگ واقعی همان Run نشان داده است؛ تست یا مرحله‌ای را حذف یا دور نزن.
 - اگر Build سبز شد، Artifact را دانلود/بررسی کن و قبل از نصب، شناسهٔ `com.grandmaconnect.feature` و امضای آن را ثبت کن. این APK جایگزین `com.grandmaconnect.preview` نیست؛ نسخهٔ اصلی را برای نصب این APK حذف نکن.
 - تست واقعی Save روی Galaxy A14 برای APK قبلی همچنان `NOT YET DONE` است. این دروازه با موفقیت Build جدید خودکار بسته نمی‌شود.
