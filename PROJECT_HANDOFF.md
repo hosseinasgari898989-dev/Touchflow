@@ -613,3 +613,41 @@ Status: IN PROGRESS
 - این بازبینی کد را تغییر نداده؛ artifact و APK همچنان دقیقاً خروجی Run موفق `44602552416` هستند.
 
 **نتیجهٔ عملی:** این APK برای نصب و آزمایش محدود روی گوشی آماده است، اما هنوز محصول نهایی و ضبط‌کنندهٔ عمومی لمس‌های برنامه‌های دیگر نیست.
+
+
+---
+
+# گزارش فوری مالک — APK هنگام ورود Crash می‌کند (2026-11-19)
+
+## گزارش مشاهده‌شده
+- مالک گزارش کرد: APK آزمایشی جدید هنگام بازکردن برنامه، قبل از نمایش/بالاآمدن صفحهٔ اصلی Crash می‌کند.
+- زمان وقوع: بلافاصله در مرحلهٔ startup / launch.
+- هنوز stack trace، Logcat یا دلیل فنی دریافت نشده است.
+- وضعیت را **RUNTIME FAILURE — ROOT CAUSE UNKNOWN** ثبت کن؛ موفقیت CI به معنی سالم‌بودن اجرای برنامه نیست.
+- این مانع از تست قابلیت‌های داخل برنامه است. فعلاً تست Widget، ضبط، playback یا UI را شروع نکن تا startup پایدار شود.
+
+## APK مرتبط با گزارش
+- Artifact: [touchflow-feature-pack-preview-apk](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44602552416/artifacts/14569201389)
+- APK package: `com.grandmaconnect.feature`
+- APK label: `TouchFlow Feature Preview`
+- APK SHA-256: `4783947f21c77e2d804f4901b9079645a261510cce00fb933f3f2fc8384e767e`
+- Build run: [44602552416](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44602552416) — CI success.
+- CI verified compile/unit test/package/signature only; no Android runtime or device launch test was performed.
+
+## اولویت فوری برای گفت‌وگوی بعدی
+1. قبل از هر کار، `PROJECT_HANDOFF.md` را از آخرین commit شاخهٔ feature بخوان.
+2. این startup crash را اولویت P0 قرار بده. از صفر شروع نکن و کاربر را وادار به بازگویی تاریخچه نکن.
+3. دقیقاً همان artifact بالا و همان SHA را بررسی کن تا مطمئن شوی APK مورد بحث با build دیگری اشتباه نشده است.
+4. سورس دقیق متناظر با artifact را از artifact سورس همان Run `14569031661` استخراج کن؛ source archive SHA-256 باید `117becdf5b48a585303c1a9cc4d2648038795abdcada00639f2c4b5a7989a4d0` باشد.
+5. مسیر startup را از `AndroidManifest.xml`، launcher Activity، `onCreate`، ساخت Viewها، `TouchCanvasView`، Macro/Widget initialization، Notification/Accessibility checks و هر کد قبل از نمایش Activity بررسی کن. دنبال exceptionهای synchronous، resource/theme/layout errors، permission handling نادرست، و crashهای API 33/35 روی Android 13 بگرد. این‌ها فقط فرضیه‌های بررسی‌اند؛ هیچ‌کدام را علت قطعی اعلام نکن مگر stack trace ثابت کند.
+6. اول تلاش کن با تست خودکار/شبیه‌ساز یا محیط در دسترس، لانچ همان APK را بازتولید و stack trace واقعی `FATAL EXCEPTION` و `Caused by` را استخراج کنی. اگر Android device/emulator در دسترس نیست، صریحاً بگو NOT AVAILABLE و بدون ادعای بازتولید، از مالک فقط یک Logcat محدود به crash بخواه؛ دستور کوتاه ADB/logcat برای گوشی بده.
+7. گزارش کاربر فعلی فقط می‌گوید «هنگام ورود، قبل از بازشدن برنامه کرش می‌کند». هنوز نمی‌دانیم آیا نصب کامل است، crash روی splash رخ می‌دهد یا پس از نمایش لحظه‌ای Activity، یا آیا permission prompt قبل از آن ظاهر شده است. این جزئیات را از خود لاگ استخراج کن؛ فقط اگر لاگ به‌تنهایی کافی نبود یک سؤال کوتاه و مشخص بپرس.
+8. پس از یافتن علت، کمترین اصلاح ممکن را روی شاخهٔ feature جدا انجام بده؛ قبلش backup شاخه با نام تاریخ‌دار، سپس تست هدفمند، Build جدید و artifact تازه با package مجزا. هیچ‌گاه APK baseline را overwrite نکن.
+9. هر مرحله، command، فایل تغییرکرده، SHA/commit، stack trace مرتبط (بدون دادهٔ شخصی/محرمانه)، تست و نتیجه را همین‌جا ثبت کن و پس از update از GitHub دوباره بخوان و تأیید کن.
+10. تا زمان رفع startup crash و تأیید لانچ واقعی، ادعای «APK آمادهٔ استفاده» نکن. هنوز PR نساز و merge نکن؛ `main` باید دست‌نخورده بماند.
+
+## قواعد کاهش اتلاف وقت
+- از تغییرات تصادفی چندفایلی، حدس‌زدن علت، یا بازطراحی UI در این مرحله خودداری کن.
+- هر فرضیه را با شواهد رد/تأیید کن؛ در هر دور یک علت مشخص را بررسی کن.
+- اگر stack trace در دسترس نیست، اول روش جمع‌آوری آن را حل کن؛ بدون آن وارد اصلاحات کور نشو.
+- اولویت این چرخه فقط این است: **بازتولید → ثبت stack trace → علت ریشه‌ای → patch حداقلی → تست startup → ثبت نتیجه**.
