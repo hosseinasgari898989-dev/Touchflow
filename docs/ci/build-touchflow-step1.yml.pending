@@ -1,0 +1,103 @@
+name: Build TouchFlow Step 1 (JUnit + assembleDebug)
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.step1-source/**'
+      - '.github/workflows/build-touchflow-step1.yml'
+
+permissions:
+  contents: read
+
+env:
+  ARCHIVE: TouchFlow-Step1-source.tar.xz
+  # SHA-256 of the source archive reconstructed from .step1-source/part-* fragments.
+  ARCHIVE_SHA256: 8811c815e01c415e48dde1f18a4b94e35d8c87bc6c106b6e2462d6ddb623f30c
+  PROJECT_DIR: GrandmaConnectNative
+  EXPECTED_PACKAGE: com.grandmaconnect.feature
+  EXPECTED_LABEL: TouchFlow
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Reassemble and verify source archive
+        run: |
+          test -d .step1-source
+          cat .step1-source/part-* | base64 --decode > "$ARCHIVE"
+          test -s "$ARCHIVE"
+          echo "$ARCHIVE_SHA256  $ARCHIVE" | sha256sum -c -
+
+      - name: Extract source (no source patching)
+        run: |
+          tar -xf "$ARCHIVE"
+          test -f "$PROJECT_DIR/settings.gradle.kts"
+          test -f "$PROJECT_DIR/app/src/main/AndroidManifest.xml"
+
+      - name: List test sources Gradle will see
+        run: find "$PROJECT_DIR/app/src/test" -name '*.kt'
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle 8.9
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Set up Android SDK 35
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
+
+      - name: JUnit
+        run: gradle --no-daemon --stacktrace -p "$PROJECT_DIR" testDebugUnitTest
+
+      - name: Assert tests actually ran
+        run: |
+          n=$(grep -ho 'tests="[0-9]*"' "$PROJECT_DIR"/app/build/test-results/testDebugUnitTest/*.xml | tr -dc '0-9\n' | paste -sd+ | bc)
+          echo "JUnit test count: $n"
+          test "$n" -gt 0
+
+      - name: assembleDebug
+        run: gradle --no-daemon --stacktrace -p "$PROJECT_DIR" assembleDebug
+
+      - name: Verify package, label, signature
+        run: |
+          APK="$PROJECT_DIR/app/build/outputs/apk/debug/app-debug.apk"
+          BT="$ANDROID_HOME/build-tools/35.0.0"
+          "$BT/aapt2" dump badging "$APK" > badging.txt
+          sed -n '1,8p' badging.txt
+          grep -q "package: name='$EXPECTED_PACKAGE'" badging.txt
+          grep -q "application-label:'$EXPECTED_LABEL'" badging.txt
+          "$BT/apksigner" verify --verbose --print-certs "$APK" | tee signature.txt
+          sha256sum "$APK" | tee apk.sha256
+          # Preserve the privacy constraint and capture the complete permission list.
+          # This records permissions; it does not enforce a permission allow-list.
+          grep -q 'canRetrieveWindowContent="false"' "$PROJECT_DIR/app/src/main/res/xml/accessibility_service_config.xml"
+          grep -o "uses-permission: name='[^']*'" badging.txt | sort | tee permissions.txt
+
+      - name: Upload APK and reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: touchflow-feature-build
+          path: |
+            ${{ env.ARCHIVE }}
+            ${{ env.PROJECT_DIR }}/app/build/outputs/apk/debug/app-debug.apk
+            ${{ env.PROJECT_DIR }}/app/build/reports/tests/testDebugUnitTest/
+            ${{ env.PROJECT_DIR }}/app/build/test-results/testDebugUnitTest/
+            badging.txt
+            signature.txt
+            apk.sha256
+            permissions.txt
+          if-no-files-found: warn
+          retention-days: 30
