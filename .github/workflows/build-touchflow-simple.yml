@@ -47,6 +47,16 @@ jobs:
           grep -F 'versionNameSuffix = "-simple"' "$APP/build.gradle.kts"
           grep -F '<string name="app_name">TouchFlow</string>' "$APP/src/main/res/values/strings.xml"
 
+      - name: Apply ScrollView child layout parameter fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE=/tmp/touchflow-source/GrandmaConnectNative/app/src/main/java/com/grandmaconnect/MainActivity.kt
+          grep -F 'ScrollView.LayoutParams(' "$FILE"
+          sed -i 's/ScrollView.LayoutParams(/FrameLayout.LayoutParams(/' "$FILE"
+          ! grep -F 'ScrollView.LayoutParams(' "$FILE"
+          grep -F 'FrameLayout.LayoutParams(' "$FILE"
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
