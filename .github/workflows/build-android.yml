@@ -24,7 +24,7 @@ jobs:
           test -s .source-v2/READY
           grep -Fx 'name=TouchFlowNative-source-v1.tar.xz' .source-v2/READY
           grep -Fx 'sha256=8cbda487156a50cc1a327eab683275aae8d2c2893cec242f23b89b8ff97027f0' .source-v2/READY
-          grep -Fx 'parts=4' .source-v2/READY
+          grep -Fx 'parts=8' .source-v2/READY
           cat .source-v2/part-* > /tmp/touchflow-source.b64
           base64 --decode /tmp/touchflow-source.b64 > /tmp/TouchFlowNative-source-v1.tar.xz
           echo '8cbda487156a50cc1a327eab683275aae8d2c2893cec242f23b89b8ff97027f0  /tmp/TouchFlowNative-source-v1.tar.xz' | sha256sum -c -
