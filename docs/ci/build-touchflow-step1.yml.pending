@@ -1,12 +1,12 @@
 name: Build TouchFlow Step 1 (JUnit + assembleDebug)
 
 on:
-  workflow_dispatch:
   push:
+    branches:
+      - feature/step1-build-bootstrap-2026-11-20
     paths:
       - 'TouchFlow-Step1-source.tar.xz'
       - '.github/workflows/build-touchflow-step1.yml'
-
 permissions:
   contents: read
 
