@@ -840,3 +840,17 @@ Previous successful APK CI: `44610974639` / APK artifact `14572996352`
 - No new APK or Android runtime test yet. CI trigger marker not yet changed.
 - Next: trigger one feature-branch CI build; inspect patch step, unit tests, APK package/signature and artifacts. Then owner repeats a short test: record 2-3 taps, stop, confirm Save becomes enabled, save and verify macro appears in list. Do not advance to macro management/widget playback until that works.
 - After save flow works, collect an exact screenshot/list of visual issues, clarify whether Full Screen means (a) a user switch for immersive bars or (b) recording touches across other applications, then plan native UI integration based on MagicPath visual reference. Do not claim device-wide capture exists.
+
+### 2026-11-20 — CI failure در patch ذخیره و اصلاح اسکریپت
+Status: IN PROGRESS (خطای patch اصلاح شده؛ Build مجدد هنوز اجرا نشده)
+Failed workflow run: [44619150847](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44619150847)
+Trigger commit: `aeceab7cb94eb5c00a156a3520433b382206de66`
+- Source archive assembly and SHA-256 check: SUCCESS.
+- Step `Apply minimal startup crash fix`: FAILED before Gradle setup.
+- Exact log: `Expected exactly one match for enable save only after a non-empty recording; found 0`.
+- The failure was not caused by Kotlin/Android code or by a bad source archive. The new Python helper tuple encoded newline as a literal backslash+n (double-escaped), so it could not match the real source lines.
+- Corrected `.touchflow-feature/startup-crash-fix.py` to use an actual Python newline escape in its matching strings. Helper blob now: `cc871ccc86cb8144f1d45a4aba7d7a963b9db54a`; commit: `16ee9aa3dd9b1919f4943c874d65fb01f22f5a05`.
+- Reapplied the corrected transformation to a fresh extraction of the original hash-verified source archive locally: startup patch and save-button state patch both applied; output source check confirms `saveButton.isEnabled = capturedGroups.isNotEmpty()` inside `showStoppedControls`.
+- Regression checks remain: `MacroSplitRulesTest: 10 assertions passed`; save-state source assertions 4 passed.
+- No APK was uploaded by failed run; no Android build step was reached.
+- Next: update the READY marker once to trigger a clean run with the corrected helper, then inspect the patch step, Gradle tests/build, APK identity/signature and artifact before asking the owner to retest.
