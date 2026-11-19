@@ -2,3 +2,4 @@ name=TouchFlowFeaturePack-source.tar.xz
 sha256=117becdf5b48a585303c1a9cc4d2648038795abdcada00639f2c4b5a7989a4d0
 parts=9
 patch=startup-crash-fix.py
+test=save-macro-enable-v1
