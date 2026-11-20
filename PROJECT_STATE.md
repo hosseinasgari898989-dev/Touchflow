@@ -224,3 +224,24 @@ Update after every material decision, branch, PR, commit, test or failure. Mark 
   - Add Help, Accessibility and Privacy pages using verified app behavior. Explain what the Accessibility service does and does not access; do not imply window-content reading or add permissions without independent justification. Privacy statements must match inspected storage/network behavior.
 - Preserve existing macro JSON/schema compatibility unless a migration is demonstrably necessary. Test old saved macros, action ordering, launch-app waits, GO_BACK/GO_HOME boundaries, rotation/orientation checks and emergency stop.
 - R2 should start from the accepted R1 feature-branch head on a new isolated feature branch. No merge to `main`, no modification to any backup, and no release/publication is authorized by this planning entry.
+
+
+## R2.1 verified build and owner device result — 2026-11-20
+
+- R2 work branch: `feature/touchflow-r2-playback-engine-2026-11-20`; latest inspected head at this record: `b9035ca08a8f952126789420a1c2e2e2269f180f`.
+- Successful CI: [Run 44728719171](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44728719171); JUnit **45/45** (zero failures/errors/skips) and `assembleDebug` success.
+- APK package/version: `com.grandmaconnect.feature` / `0.1.0-alpha-feature`.
+- APK SHA-256: `1163cd2ad42d4975253cd9bc02a0bda7a33d75119d69019e768ee274ed677fcf`.
+- APK v2 signature verification: PASS; signer certificate SHA-256 `7cabfa7b4088be8664326d93113652d562aac4d94eb9c7fe6b636ac082bfdce9`.
+- Only requested permission: `POST_NOTIFICATIONS`; `canRetrieveWindowContent=false` check passed in CI.
+- Owner-reported Galaxy A14 test: **PASS — owner says R2.1 worked without issues.** Individual test cases were not itemized, so exhaustive edge-case coverage is not claimed.
+- Baseline APK/package remains separate and untouched; R2.1 is a separate `.feature` installation. No merge to main or backup modification.
+
+## Current next step: R2.2 Timeline UI
+
+- Status: **NEXT / NOT STARTED**.
+- Implement a real bottom macro timeline using the saved macro's actual Gesture Groups and ordered Actions, with ruler/time labels, a data-driven playhead, elapsed/total time, Play/Pause/Resume/Stop, backward/forward navigation and drag-to-seek.
+- Seek must snap to valid Gesture Group / Action boundaries supported by the current data. Mid-gesture/frame-accurate seeking is out of scope unless raw-path slicing, schema implications and dedicated tests prove it.
+- Drag during playback: pause at a safe boundary, snap to the selected valid point, remain paused until explicit Resume.
+- Preserve R2.1 playback engine guarantees, macro JSON/schema compatibility, emergency Stop, stale-callback isolation, RTL and `canRetrieveWindowContent=false`.
+- Before coding: inspect the R2.1 source archive and actual engine/model, record a backup reference, then create a new isolated R2.2 feature branch from accepted R2.1 head. Do not touch `main`, backup branches or baseline.
