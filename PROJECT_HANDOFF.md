@@ -1,3 +1,79 @@
+# NEXT-SESSION HANDOFF — INTELLIGENT MISSION LAYER (2026-11-20)
+
+## Read this first: owner's corrected direction
+
+The owner wants to continue from the **working R2.1 TouchFlow app**, not start over and not remove the existing macro system.
+
+### Confirmed facts
+
+- The owner uploaded `TouchFlow-R2-1-debug.apk` in the latest conversation. The exact file measured 1,136,439 bytes and SHA-256 was independently checked as:
+  
+  `1163cd2ad42d4975253cd9bc02a0bda7a33d75119d69019e768ee274ed677fcf`
+
+- This equals the already recorded R2.1 build APK digest. R2.1 is the current accepted/working reference. Owner's device feedback: it worked without defects. Record this as owner-reported acceptance.
+- R2.1 source/backup reference: `backup/touchflow-r2-1-accepted-2026-11-20`, commit `6e6ba179d5f836b3da13511210163feadd61d5ee`.
+- Keep all existing recording, playback, macro and saved user data behavior. The owner specifically clarified that the robot works with the recording/macro concept; do not replace or remove it.
+- The owner wants an intelligent robot/agent which receives a mission, understands what is being requested, chooses the steps and carries them out using/with TouchFlow's existing recording and macro capabilities. The target app may not already be open; the expected behavior includes recognizing that and handling app launch/start as part of the task, subject to Android feasibility and permissions.
+- The owner may explain/teach the task to the robot. Exactly how the teaching process works is still open.
+- Core mission understanding and task execution are targeted to function **fully offline**. This is a requirement to investigate and design for, not a claim that current R2.1 already has an on-device AI model.
+
+### Explicit cancellation
+
+ChatGPT independently created an R2.2 Timeline candidate. The owner cancelled it and said the version was unsatisfactory. Therefore:
+
+- The candidate branch `feature/touchflow-r2-2-timeline-2026-11-20` and its CI artifacts are **cancelled historical work**, not an accepted feature or an active baseline.
+- Do not install, continue, merge, release or publish that candidate. Do not base the next implementation on it.
+- Keep the candidate branch/artifacts intact as history unless the owner separately asks for cleanup.
+- Do not attribute any of that implementation to Claude; Claude has not approved it.
+- The next planned version number is **not decided**. Do not label the new intelligent mission work R2.2 until the owner chooses a versioning scheme.
+
+## What is not decided — no guessing
+
+The owner's concept is clear at the product level, but implementation choices remain unresolved. Claude must inspect the exact R2.1 source and present options rather than silently assume any of these:
+
+1. Whether the agent chooses among previously recorded macros, records a new macro after being taught, dynamically combines existing macros, or uses a hybrid.
+2. What “teaching” means in the UI: natural-language explanation, user-guided demonstration/recording, app/task selection, examples, or another flow.
+3. How an offline model/runtime will run on the actual target phone; model size, RAM/storage, inference speed, language support, update/install process and whether a separate model package is required.
+4. How the agent detects the target app, launches it when closed, waits for readiness, verifies the correct screen/state, and recovers from unexpected UI states.
+5. Which Android APIs and accessibility capabilities are genuinely available in this project. R2.1's CI checked `canRetrieveWindowContent=false`; do not assume the service can read screen content or silently change that privacy boundary.
+6. Which permissions, app visibility declarations, foreground service behavior, battery constraints or OS restrictions might be required. Explain each to the owner; do not add them without approval.
+7. How missions, learned task descriptions and macros are persisted while preserving existing user data and old macro compatibility.
+8. Which actions need an explicit user confirmation before execution, especially actions with external or irreversible effects. Propose a safe default; owner decides the policy.
+
+## Required first deliverable from Claude (before code)
+
+Claude must perform a source-grounded feasibility and architecture review of the accepted R2.1 source, then provide:
+
+- Exact source inventory: current recorder, macro model/schema, persistence, playback engine, AccessibilityService/permissions, app navigation and build configuration.
+- A simple end-to-end flow from mission input/teaching → task interpretation → plan/action selection → app launch/state verification → macro recording/selection/playback → result verification and error recovery.
+- At least two viable offline architecture options if the source/target device permits them, with model/runtime footprint, performance, limitations, privacy impact and maintenance trade-offs. If fully offline is infeasible on the target hardware, state the blocker plainly and offer alternatives without quietly weakening the requirement.
+- A concrete explanation of how the intelligent layer cooperates with the existing recorder/macros; explicitly resolve the open question in item 1 above with a recommendation.
+- Data compatibility and migration/rollback plan. Default assumption: preserve existing macros and avoid schema changes.
+- Permission/accessibility analysis based on actual manifest/service code. No privacy-boundary change without owner approval.
+- Incremental implementation milestones, automated tests, device test plan for Galaxy A14 / Android 13, and acceptance criteria.
+- A list of unknowns and any essential owner decisions, separated from verified source facts.
+
+No product code, workflow or permission change should be made until the owner reviews and approves this proposal.
+
+## Process / source of truth
+
+- Claude is the implementation and engineering agent.
+- ChatGPT is coordinator, planner, prompt author, reviewer and documentation assistant only. ChatGPT must not independently implement product code/workflows unless the owner explicitly authorizes it.
+- Make small, isolated branches from the accepted R2.1 source. Keep `main`, the R2.1 backup, the uploaded R2.1 APK and user macro data untouched.
+- Do not delete legacy content to make room for the new feature. Preserve existing functionality and test backward compatibility.
+- Mark claims as VERIFIED / OWNER-REPORTED / PROPOSED / UNKNOWN. Never infer a test pass or device result.
+
+## Exact repository pointers (verified 2026-11-20)
+
+- Repository: https://github.com/hosseinasgari898989-dev/Touchflow
+- Default branch `main`: `6c738c2214d4244913fe449ed6172db613f844bd` (unchanged at last verification).
+- Accepted R2.1 backup: `backup/touchflow-r2-1-accepted-2026-11-20` at `6e6ba179d5f836b3da13511210163feadd61d5ee`.
+- This handoff branch: `docs/touchflow-mission-agent-direction-2026-11-20`, created from the accepted R2.1 backup; documentation only.
+- Cancelled R2.2 candidate: `feature/touchflow-r2-2-timeline-2026-11-20`; not the next feature base.
+- No new implementation PR, merge, release or publish has been created by this handoff.
+
+---
+
 # TouchFlow — پروندهٔ پیوست و دفتر ثبت پروژه
 
 **آخرین تطبیق:** 2026-11-19  
