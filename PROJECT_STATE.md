@@ -245,3 +245,23 @@ Update after every material decision, branch, PR, commit, test or failure. Mark 
 - Drag during playback: pause at a safe boundary, snap to the selected valid point, remain paused until explicit Resume.
 - Preserve R2.1 playback engine guarantees, macro JSON/schema compatibility, emergency Stop, stale-callback isolation, RTL and `canRetrieveWindowContent=false`.
 - Before coding: inspect the R2.1 source archive and actual engine/model, record a backup reference, then create a new isolated R2.2 feature branch from accepted R2.1 head. Do not touch `main`, backup branches or baseline.
+
+
+## R2.2 Timeline — CI PASS, device gate pending (2026-11-20)
+
+- Branch: `feature/touchflow-r2-2-timeline-2026-11-20`.
+- Latest R2.2 implementation/CI commit before documentation updates: `48134c0a0175077ef83775d6fa4b738dfbafffef`.
+- R2.1 accepted base: `6e6ba179d5f836b3da13511210163feadd61d5ee`.
+- Backup `backup/touchflow-r2-1-accepted-2026-11-20` preserved at the R2.1 accepted base.
+- Final CI [44770977128](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44770977128): success. JUnit **55/55**, zero failures/errors/skips; `assembleDebug` successful.
+- APK SHA-256: `5c3864252ada098d3783c2c49b2125f7c40e4511db8560aa107310a7504fdf9a`.
+- APK package `com.grandmaconnect.feature`, label `TouchFlow`, versionName `0.1.0-alpha-feature`.
+- APK signature verification: PASS, v2; signer certificate SHA-256 `a3e34da4107da73a26b968ea754f856bf532b7734b13402f6cfec48e95887a2e`.
+- Only requested permission: `POST_NOTIFICATIONS`; `canRetrieveWindowContent=false` retained and CI-checked.
+- Patched build source archive SHA-256: `c322d1aa53f8cd44ce482e018b90d0a6aaec1792f7a70e060ea8f43954a1c61f`.
+- Artifact ID `14648195618`; ZIP SHA-256 `d5138fd1ff6397a1e90a6f2b2be808a1f9a7a87e16d716dfd84d7d79b0b674da`. Artifact and extracted APK/source checksums independently verified.
+- Final follow-up: live drag-to-seek remains enabled only while playback snapshot says `canSeek`; drag start requests safe pause and seek is applied after the active gesture finishes. This was rebuilt and re-tested in final run.
+- R2.2 owner device acceptance: **PENDING**; do not mark complete until owner tests it on Galaxy A14 / Android 13.
+- `main` remains unchanged at `6c738c2214d4244913fe449ed6172db613f844bd`; no merge or publication.
+- Baseline `com.grandmaconnect.preview` remains separate and untouched. Install the R2.2 debug package alongside it; do not uninstall/replace the Baseline.
+- Next action: owner tests the R2.2 APK on device. Capture observed results; then update acceptance status. R2.3 (speed/repeat/start delay) remains unstarted until R2.2 is accepted.
