@@ -189,3 +189,20 @@ Update after every material decision, branch, PR, commit, test or failure. Mark 
 - R1 gate: **CI BUILD + JUNIT PASSED**. This is not device verification. The 18 items in `docs/R1-DEVICE-CHECKLIST-fa.md` remain unchecked until the owner tests the APK on Galaxy A14 / Android 13.
 - Next owner action: download APK from the artifact, install as the separate package `com.grandmaconnect.feature` (do not replace `com.grandmaconnect.preview`), then execute the R1 device checklist. Report failures or completed items; do not mark every checklist item done without testing.
 - Main last verified at `6c738c2214d4244913fe449ed6172db613f844bd`; no write operation in this task targeted main or backup branches.
+
+## R1 post-CI artifact audit — 2026-11-20
+
+- Current R1 branch: `feature/touchflow-r1-recording-actions-2026-11-20`.
+- Latest GitHub Actions branch-filtered page showed 3 runs; newest is Run [44641623406](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44641623406), workflow run #8, event `push`, commit `fffe19113724c2c85c909fd35bac302c253d3cff`. No newer workflow run was listed at audit time.
+- Run #8 job `build` ID `135973818897`: completed / success. Archive SHA verification, extraction, documented SearchRules test-fixture correction, JUnit, exact test-count assertion, assembleDebug, package/label/signature/permission checks and artifact upload all succeeded.
+- JUnit report: 24 tests; 0 failures; 0 errors; 0 skipped.
+- Artifact `touchflow-r1-build`, ID `14587006288`, is available. Downloaded archive SHA-256: `82dbff480489b4b6e1e5a0816c7f89061c36096224d8d347527c46c5ba8bb1df`; this matches the GitHub artifact digest.
+- Extracted R1 APK: size `1,130,871 bytes`; SHA-256 `c42defa8a3bdcaac3342364a17410232fc7589f37c394822ee51f726df74848c`; matches the artifact's `apk.sha256`.
+- R1 APK metadata: package `com.grandmaconnect.feature`; label `TouchFlow`; versionCode 1; versionName `0.1.0-alpha-feature`; minSdk 24; targetSdk 35; only declared permission `android.permission.POST_NOTIFICATIONS`; APK Signature Scheme v2 verified.
+- R1 debug signer certificate SHA-256: `084ac46148aa989df58bd03d7254dfa4e62c7f7971104dd2adcc2c34e5ad4599`. This is not the original Baseline signing key. Do not overwrite an existing `.feature` installation without checking its signer first. Keep `com.grandmaconnect.preview` / Baseline installed and untouched.
+- Owner-provided `GrandmaConnect-preview.apk` was independently checked in the assistant runtime: size `866,747 bytes`, SHA-256 `6dce713dfebcbf84ed5a175b6eb73808791765464087526875c3fe6f11bd0b89`; exact match to the recorded Baseline. It is not the R1 APK.
+- Branch compare: R1 branch is 2 commits ahead of the successful CI commit `fffe191...`; the only changed path in that delta is `PROJECT_STATE.md` (31 additions). No source archive, application source or workflow change occurred after the successful run.
+- Protected refs verified read-only: `main` is identical to `6c738c2214d4244913fe449ed6172db613f844bd`; `backup/native-baseline-2026-11-19` is identical to `d62899f0eb586a870471648fd3d77d4b8f50fb8d`. No write operation targeted `main` or any Backup branch during this continuation.
+- Checklist discrepancy: the state refers to `docs/R1-DEVICE-CHECKLIST-fa.md`, but fetching that exact path returned GitHub 404 and the current `docs/` listing showed only `ci/`. Treat the checklist file as **NOT FOUND at the referenced path** until its actual path is verified; do not invent completion.
+- GitHub Actions emitted non-blocking deprecation warnings for actions targeting Node.js 20 and `actions/setup-java@v4`. Build remains successful; track action-version maintenance separately.
+- Device acceptance remains **NOT VERIFIED**. The successful CI does not prove runtime behavior on Samsung Galaxy A14 / Android 13. Next gate: owner installs this exact R1 APK only as the separate `.feature` package (subject to checking for an already-installed `.feature` app) and reports observed results; do not remove or replace the Baseline app.
