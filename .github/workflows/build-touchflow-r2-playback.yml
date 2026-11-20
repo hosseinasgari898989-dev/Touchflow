@@ -1,0 +1,143 @@
+name: Build TouchFlow R2.1 Playback Engine (JUnit + assembleDebug)
+
+on:
+  push:
+    branches:
+      - 'feature/touchflow-r2-playback-engine-2026-11-20'
+    paths:
+      - 'TouchFlow-R2-1-source.tar.xz'
+      - '.github/workflows/build-touchflow-r2-playback.yml'
+
+permissions:
+  contents: read
+
+env:
+  ARCHIVE: TouchFlow-R2-1-source.tar.xz
+  # SHA-256 of the archive checked in at the repo root. Do not change without a new archive.
+  ARCHIVE_SHA256: 9912a5def4851a5a2d18d9a63ba12b51170e4edcce82b7bdf01ceae211df350d
+  PROJECT_DIR: GrandmaConnectNative
+  EXPECTED_PACKAGE: com.grandmaconnect.feature
+  EXPECTED_LABEL: TouchFlow
+  # 24 (R1) + 21 PlaybackEngineTest
+  EXPECTED_TESTS: '45'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify archive hash
+        run: |
+          test -s "$ARCHIVE"
+          echo "$ARCHIVE_SHA256  $ARCHIVE" | sha256sum -c -
+
+      - name: Extract source (no source patching)
+        run: |
+          tar -xf "$ARCHIVE"
+          test -f "$PROJECT_DIR/settings.gradle.kts"
+          test -f "$PROJECT_DIR/app/src/main/AndroidManifest.xml"
+          echo "Test sources Gradle will see:"
+          find "$PROJECT_DIR/app/src/test" -name '*.kt' | sort
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle 8.9
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Set up Android SDK 35
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
+
+      - name: JUnit
+        run: gradle --no-daemon --stacktrace -p "$PROJECT_DIR" testDebugUnitTest
+
+      - name: Assert exact test count and zero failures
+        run: |
+          python3 - <<'PY'
+          import glob, os, sys
+          import xml.etree.ElementTree as ET
+          root = os.environ["PROJECT_DIR"] + "/app/build/test-results/testDebugUnitTest/*.xml"
+          expected = int(os.environ["EXPECTED_TESTS"])
+          total = failed = errors = skipped = 0
+          lines = []
+          for path in sorted(glob.glob(root)):
+              suite = ET.parse(path).getroot()
+              t = int(suite.get("tests", 0)); f = int(suite.get("failures", 0))
+              e = int(suite.get("errors", 0)); s = int(suite.get("skipped", 0))
+              total += t; failed += f; errors += e; skipped += s
+              lines.append(f"{suite.get('name')}: tests={t} failures={f} errors={e} skipped={s}")
+          lines.append(f"TOTAL: tests={total} failures={failed} errors={errors} skipped={skipped} expected={expected}")
+          open("test-summary.txt", "w").write("\n".join(lines) + "\n")
+          print("\n".join(lines))
+          if total != expected or failed or errors or skipped:
+              sys.exit("Unexpected JUnit result (see test-summary.txt)")
+          PY
+
+      - name: assembleDebug
+        run: gradle --no-daemon --stacktrace -p "$PROJECT_DIR" assembleDebug
+
+      - name: Verify package, label, signature, permissions
+        run: |
+          APK="$PROJECT_DIR/app/build/outputs/apk/debug/app-debug.apk"
+          BT="$ANDROID_HOME/build-tools/35.0.0"
+
+          # Full aapt2 output goes to the file first; no pipe, nothing truncated.
+          "$BT/aapt2" dump badging "$APK" > badging.txt
+          head -5 badging.txt
+          grep -q "package: name='$EXPECTED_PACKAGE'" badging.txt
+          grep -q "application-label:'$EXPECTED_LABEL'" badging.txt
+
+          "$BT/apksigner" verify --verbose --print-certs "$APK" > signature.txt
+          cat signature.txt
+          grep -q '^Verifies' signature.txt
+
+          sha256sum "$APK" > apk.sha256
+          cat apk.sha256
+
+          grep -q 'canRetrieveWindowContent="false"' "$PROJECT_DIR/app/src/main/res/xml/accessibility_service_config.xml"
+
+          # Explicit permission allowlist: the APK must request exactly these, nothing else.
+          grep -E "^uses-(implied-)?permission" badging.txt > permissions-raw.txt || true
+          grep -oE "^uses-permission: name='[^']+'" badging.txt | sed -E "s/.*name='([^']+)'/\1/" | sort -u > permissions.txt || true
+          printf '%s\n' \
+            'android.permission.POST_NOTIFICATIONS' \
+            | sort -u > permissions.allowlist
+          echo "--- permissions found ---"; cat permissions.txt
+          if ! diff -u permissions.allowlist permissions.txt; then
+            echo "::error::APK permissions differ from the allowlist"
+            exit 1
+          fi
+          if grep -q '^uses-implied-permission' permissions-raw.txt; then
+            echo "::error::Unexpected implied permission"
+            cat permissions-raw.txt
+            exit 1
+          fi
+
+      - name: Upload APK and reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: touchflow-r2-1-build
+          path: |
+            ${{ env.PROJECT_DIR }}/app/build/outputs/apk/debug/app-debug.apk
+            ${{ env.PROJECT_DIR }}/app/build/reports/tests/testDebugUnitTest/
+            ${{ env.PROJECT_DIR }}/app/build/test-results/testDebugUnitTest/
+            test-summary.txt
+            badging.txt
+            signature.txt
+            apk.sha256
+            permissions.txt
+            permissions.allowlist
+            permissions-raw.txt
+          if-no-files-found: warn
+          retention-days: 30
