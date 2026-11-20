@@ -9,6 +9,7 @@ on:
       - '.github/patches/r2-2-timeline.patch.xz.b64'
       - '.github/patches/r2-2-timeline.patch.xz.b64.part-*'
       - '.github/workflows/build-touchflow-r2-2.yml'
+      - '.github/patches/r2-2-live-drag-fix.patch'
 
 permissions:
   contents: read
@@ -72,6 +73,9 @@ jobs:
           echo "$PATCH_SHA256  r2-2-timeline.patch" | sha256sum -c -
           git apply --check r2-2-timeline.patch
           git apply r2-2-timeline.patch
+          echo "eb509d03c3855eeb519b655be822e7762179cb0bf34387a5d167ae6f7d1a7c67  .github/patches/r2-2-live-drag-fix.patch" | sha256sum -c -
+          git apply --check .github/patches/r2-2-live-drag-fix.patch
+          git apply .github/patches/r2-2-live-drag-fix.patch
           git diff --check
           git status --short
 
