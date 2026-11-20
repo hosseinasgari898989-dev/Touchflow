@@ -1,0 +1,14 @@
+diff --git a/GrandmaConnectNative/app/build.gradle.kts b/GrandmaConnectNative/app/build.gradle.kts
+--- a/GrandmaConnectNative/app/build.gradle.kts
++++ b/GrandmaConnectNative/app/build.gradle.kts
+@@ -18,8 +18,8 @@ android {
+ 
+     buildTypes {
+         debug {
+-            applicationIdSuffix = ".feature"
+-            versionNameSuffix = "-feature"
++            applicationIdSuffix = ".feature.r22"
++            versionNameSuffix = "-feature-r22"
+         }
+         release {
+             isMinifyEnabled = false
