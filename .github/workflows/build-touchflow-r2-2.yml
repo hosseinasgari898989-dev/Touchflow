@@ -7,6 +7,7 @@ on:
     paths:
       - 'TouchFlow-R2-1-source.tar.xz'
       - '.github/patches/r2-2-timeline.patch.xz.b64'
+      - '.github/patches/r2-2-timeline.patch.xz.b64.part-*'
       - '.github/workflows/build-touchflow-r2-2.yml'
 
 permissions:
@@ -15,9 +16,8 @@ permissions:
 env:
   ARCHIVE: TouchFlow-R2-1-source.tar.xz
   ARCHIVE_SHA256: 9912a5def4851a5a2d18d9a63ba12b51170e4edcce82b7bdf01ceae211df350d
-  PATCH_B64: .github/patches/r2-2-timeline.patch.xz.b64
-  PATCH_XZ_SHA256: 5c0cf0fb1c45347ce521b60bbb59fa623f4686806831e934c7233e3bd1217278
-  PATCH_SHA256: 7618d4e80208dca49343c5ba9c58f952274277b1c8579cd0ac7bca2f9c9f06b31
+  PATCH_XZ_SHA256: 66c2bd66e4dfa9a2ed79179b5f4d4e138de4a29975a4b440555937c481bd18bf
+  PATCH_SHA256: 7618d4e80208dca49343c5ba9c58f952274277b1c8579cd0ac7bca2f9c06b31f
   PROJECT_DIR: GrandmaConnectNative
   EXPECTED_PACKAGE: com.grandmaconnect.feature
   EXPECTED_LABEL: TouchFlow
@@ -64,7 +64,9 @@ jobs:
 
       - name: Verify and apply R2.2 source patch
         run: |
-          base64 -d "$PATCH_B64" > r2-2-timeline.patch.xz
+          cat .github/patches/r2-2-timeline.patch.xz.b64.part-* | tr -d '\r\n' > r2-2-timeline.patch.xz.b64
+          test "$(wc -c < r2-2-timeline.patch.xz.b64)" -eq 19336
+          base64 -d r2-2-timeline.patch.xz.b64 > r2-2-timeline.patch.xz
           echo "$PATCH_XZ_SHA256  r2-2-timeline.patch.xz" | sha256sum -c -
           xz -dc r2-2-timeline.patch.xz > r2-2-timeline.patch
           echo "$PATCH_SHA256  r2-2-timeline.patch" | sha256sum -c -
