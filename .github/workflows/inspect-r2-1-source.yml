@@ -1,0 +1,40 @@
+name: Inspect accepted R2.1 source for R2.2 planning
+
+on:
+  push:
+    branches:
+      - 'feature/touchflow-r2-2-timeline-2026-11-20'
+    paths:
+      - '.github/workflows/inspect-r2-1-source.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify exact accepted R2.1 source archive
+        run: |
+          test -s TouchFlow-R2-1-source.tar.xz
+          echo "9912a5def4851a5a2d18d9a63ba12b51170e4edcce82b7bdf01ceae211df350d  TouchFlow-R2-1-source.tar.xz" | sha256sum -c -
+
+      - name: List archive members without modifying source
+        run: |
+          tar -tf TouchFlow-R2-1-source.tar.xz | tee source-files.txt
+          grep -E 'Playback|Macro|Timeline|Gesture' source-files.txt | tee relevant-source-files.txt
+
+      - name: Preserve exact source snapshot for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: touchflow-r2-1-source-inspection
+          path: |
+            TouchFlow-R2-1-source.tar.xz
+            source-files.txt
+            relevant-source-files.txt
+          if-no-files-found: error
+          retention-days: 7
