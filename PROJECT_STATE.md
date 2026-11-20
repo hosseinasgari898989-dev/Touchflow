@@ -265,3 +265,16 @@ Update after every material decision, branch, PR, commit, test or failure. Mark 
 - `main` remains unchanged at `6c738c2214d4244913fe449ed6172db613f844bd`; no merge or publication.
 - Baseline `com.grandmaconnect.preview` remains separate and untouched. Install the R2.2 debug package alongside it; do not uninstall/replace the Baseline.
 - Next action: owner tests the R2.2 APK on device. Capture observed results; then update acceptance status. R2.3 (speed/repeat/start delay) remains unstarted until R2.2 is accepted.
+
+
+## Final R2.2 package identity and build — supersedes prior R2.2 APK
+
+- Final R2.2 CI run: [44771585290](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44771585290), success; 55/55 tests, zero failures/errors/skips; `assembleDebug` success.
+- Final APK package is `com.grandmaconnect.feature.r22` (not `com.grandmaconnect.feature`); versionName `0.1.0-alpha-feature-r22`; app label `TouchFlow`.
+- APK SHA-256: `668bc2653a32ac7eee61e229683afe4699e00f6919d95f347456aab8b9718912`.
+- Signature v2 verified; signer certificate SHA-256 `12e6100c83532dc31a93ffa8e850ab9ef4a555b8ead75fe2851ea13fda70b5b4`.
+- Only declared permission: `POST_NOTIFICATIONS`; Accessibility config remains `canRetrieveWindowContent=false`.
+- Exact patched source archive SHA-256: `8dff399d4d09a0a2be1663000d307d9cb890aa65cf166d377fd9c01843e4d4d3`.
+- Artifact ID `14648256141`; ZIP SHA-256 `e67881aa38b6d3a5f8ebc93255518d05b5e78e2b8907739d3b39cb409439fc11`. The downloaded ZIP's checksum, APK checksum and source checksum were verified against CI reports.
+- R2.2 package suffix is deliberately isolated to allow side-by-side installation. Keep R2.1 `com.grandmaconnect.feature` and Baseline `com.grandmaconnect.preview` installed; do not uninstall either, and do not install the superseded R2.2 artifact whose package was `com.grandmaconnect.feature`.
+- Current feature branch remains `feature/touchflow-r2-2-timeline-2026-11-20`. R2.2 physical-device acceptance is **PENDING** on Galaxy A14 / Android 13. R2.3 has not started.
