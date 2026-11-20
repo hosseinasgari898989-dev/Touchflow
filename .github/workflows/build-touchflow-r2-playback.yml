@@ -48,7 +48,7 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          p = Path("$PROJECT_DIR/app/src/test/java/com/grandmaconnect/SearchRulesTest.kt")
+          p = Path("GrandmaConnectNative/app/src/test/java/com/grandmaconnect/SearchRulesTest.kt")
           old = 'SearchRules.matches("چت تلگرام", "تلگرام", "org.telegram.chat")'
           new = 'SearchRules.matches("chat تلگرام", "تلگرام", "org.telegram.chat")'
           source = p.read_text(encoding="utf-8")
