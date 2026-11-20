@@ -10,6 +10,7 @@ on:
       - '.github/patches/r2-2-timeline.patch.xz.b64.part-*'
       - '.github/workflows/build-touchflow-r2-2.yml'
       - '.github/patches/r2-2-live-drag-fix.patch'
+      - '.github/patches/r2-2-install-isolation.patch'
 
 permissions:
   contents: read
@@ -20,7 +21,7 @@ env:
   PATCH_XZ_SHA256: 66c2bd66e4dfa9a2ed79179b5f4d4e138de4a29975a4b440555937c481bd18bf
   PATCH_SHA256: 7618d4e80208dca49343c5ba9c58f952274277b1c8579cd0ac7bca2f9c06b31f
   PROJECT_DIR: GrandmaConnectNative
-  EXPECTED_PACKAGE: com.grandmaconnect.feature
+  EXPECTED_PACKAGE: com.grandmaconnect.feature.r22
   EXPECTED_LABEL: TouchFlow
   EXPECTED_TESTS: '55'
 
@@ -76,6 +77,9 @@ jobs:
           echo "eb509d03c3855eeb519b655be822e7762179cb0bf34387a5d167ae6f7d1a7c67  .github/patches/r2-2-live-drag-fix.patch" | sha256sum -c -
           git apply --check .github/patches/r2-2-live-drag-fix.patch
           git apply .github/patches/r2-2-live-drag-fix.patch
+          echo "7054bb9f9b2bbb66435e7f067c1c39dc9a4517d296291409011f143c58455307  .github/patches/r2-2-install-isolation.patch" | sha256sum -c -
+          git apply --check .github/patches/r2-2-install-isolation.patch
+          git apply .github/patches/r2-2-install-isolation.patch
           git diff --check
           git status --short
 
