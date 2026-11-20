@@ -1172,3 +1172,41 @@ Implement the first real, data-backed playback timeline. The previous owner-prov
 - CI must assert the exact expected test count, zero failures/errors/skips, successful debug APK build, package/signature/permission checks, and Accessibility privacy setting.
 - Device acceptance on Galaxy A14 / Android 13 is a separate gate. Build/test success alone does not close it.
 - Before R2.2 coding, inspect the exact R2.1 source archive and engine/model code, create a backup reference and a new isolated feature branch based on accepted R2.1 head. Keep `main`, backups and baseline untouched.
+
+
+## R2.2 Timeline implementation + CI build — 2026-11-20
+
+- Isolated implementation branch: `feature/touchflow-r2-2-timeline-2026-11-20`.
+- R2.1 accepted base before R2.2 work: `6e6ba179d5f836b3da13511210163feadd61d5ee`.
+- Immutable R2.1 backup: `backup/touchflow-r2-1-accepted-2026-11-20` at the accepted R2.1 base.
+- Latest implementation/CI workflow commit: `48134c0a0175077ef83775d6fa4b738dfbafffef`.
+- No merge or push to `main`; `main` remains `6c738c2214d4244913fe449ed6172db613f844bd`. R2.1 backup remains unchanged. No release/publish operation was performed.
+
+### Implemented R2.2 behavior
+- Real bottom Timeline view reads the saved macro's actual Gesture Groups and ordered Actions. The planner calculates the timeline from group offsets/durations and action wait intervals; it does not use fake progress.
+- Includes time ruler, playhead, elapsed/total time, group/action segments, previous/next boundary navigation, Play/Pause/Resume/Stop, and drag-to-seek.
+- Seeking snaps only to valid safe boundaries between complete Gesture Groups and before/after Actions. Mid-stroke or frame-accurate seek is not supported and is not claimed.
+- While playback is active, starting a drag requests safe Pause; the current gesture is allowed to complete. The selected cursor is applied only after the engine reaches PAUSED, and execution remains paused until explicit Resume.
+- A follow-up review found that Timeline touch was disabled during PLAYING, which prevented the intended drag-to-seek behavior. This was corrected in the final source by keeping drag enabled only when the engine snapshot reports `canSeek`; `ACTION_DOWN` requests safe pause and service-side cursor seek waits for PAUSED.
+- A transparent, non-touchable notification gate opens the Timeline without sending active macro gestures into its controls. Resume closes the Timeline so gestures run against the target app.
+- Existing macro JSON schema and saved formats were not migrated. `canRetrieveWindowContent=false` and the `POST_NOTIFICATIONS`-only permission list were retained.
+
+### Final CI evidence
+- Final workflow run: [44770977128](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44770977128), final branch head `48134c0a0175077ef83775d6fa4b738dfbafffef`, conclusion **success**.
+- JUnit: **55 tests, 0 failures, 0 errors, 0 skipped**. This includes 7 `MacroTimelineTest` cases and 24 `PlaybackEngineTest` regression cases.
+- `assembleDebug`: SUCCESS.
+- APK package: `com.grandmaconnect.feature`; label `TouchFlow`; versionName `0.1.0-alpha-feature`.
+- APK SHA-256: `5c3864252ada098d3783c2c49b2125f7c40e4511db8560aa107310a7504fdf9a`.
+- Signature verification: PASS (APK Signature Scheme v2); signer certificate SHA-256 `a3e34da4107da73a26b968ea754f856bf532b7734b13402f6cfec48e95887a2e`.
+- APK requested permission: only `android.permission.POST_NOTIFICATIONS`; CI privacy check for `canRetrieveWindowContent="false"`: PASS.
+- Exact patched source archive in the build artifact: `TouchFlow-R2-2-source.tar.xz`, SHA-256 `c322d1aa53f8cd44ce482e018b90d0a6aaec1792f7a70e060ea8f43954a1c61f`.
+- Artifact: [14648195618](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44770977128/artifacts/14648195618), `touchflow-r2-2-build`, expires 2026-12-20.
+- Final artifact ZIP SHA-256: `d5138fd1ff6397a1e90a6f2b2be808a1f9a7a87e16d716dfd84d7d79b0b674da`. Downloaded artifact, APK checksum and source archive checksum were independently verified in the assistant runtime.
+- Earlier CI run [44770375677](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44770375677) also passed before the live-drag correction. It is superseded by the final run above.
+- The earlier staging run [44768494686](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44768494686) failed only during malformed base64 patch transport, before Kotlin/JUnit/build. It is not the final source result.
+
+### Current acceptance status
+- CI and APK/package/signature/permission verification: **PASS**.
+- Owner physical-device acceptance on Galaxy A14 / Android 13: **NOT YET RECORDED for R2.2**.
+- Do not describe Timeline as device-accepted until the owner checks notification-to-Timeline entry, play/pause/resume/stop, live drag while a safe macro is running, boundary snapping, previous/next, and confirms there are no stray touches/actions.
+- Keep the Baseline app/package `com.grandmaconnect.preview` installed and untouched. R2.2 is a separate `com.grandmaconnect.feature` debug install, not an in-place update.
