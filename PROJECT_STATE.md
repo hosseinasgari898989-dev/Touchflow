@@ -206,3 +206,21 @@ Update after every material decision, branch, PR, commit, test or failure. Mark 
 - Checklist discrepancy: the state refers to `docs/R1-DEVICE-CHECKLIST-fa.md`, but fetching that exact path returned GitHub 404 and the current `docs/` listing showed only `ci/`. Treat the checklist file as **NOT FOUND at the referenced path** until its actual path is verified; do not invent completion.
 - GitHub Actions emitted non-blocking deprecation warnings for actions targeting Node.js 20 and `actions/setup-java@v4`. Build remains successful; track action-version maintenance separately.
 - Device acceptance remains **NOT VERIFIED**. The successful CI does not prove runtime behavior on Samsung Galaxy A14 / Android 13. Next gate: owner installs this exact R1 APK only as the separate `.feature` package (subject to checking for an already-installed `.feature` app) and reports observed results; do not remove or replace the Baseline app.
+
+## R1 device acceptance + R2 request — 2026-11-20
+
+- Owner's device feedback: **R1 installed and operated successfully; owner reports it worked completely and no defects were observed.** Record this as `OWNER-REPORTED DEVICE PASS` for the tests the owner performed, not as a claim that every possible device/configuration edge case has been exhausted.
+- R1 CI evidence remains Run [44641623406](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44641623406), 24/24 JUnit and successful `assembleDebug`. The validated R1 APK is package `com.grandmaconnect.feature`; Baseline package `com.grandmaconnect.preview` must remain untouched.
+- Owner provided a timeline-editor visual reference (2026-11-20): bottom timeline/ruler with a vertical playhead, visible time marks (example `00:00`, `00:02`), and the ability to start playback or move backward/forward by dragging or navigating the playhead. Treat it as an interaction reference, not a pixel-perfect copy.
+- New requested capabilities for the next milestone:
+  1. InShot-inspired bottom macro timeline with ruler/time labels, current-position playhead, play/pause/resume/stop transport controls, and seek backward/forward or by dragging the playhead.
+  2. Playback options: speed, repeat, and start delay.
+  3. Persian help/guide, Accessibility information/settings, and Privacy information pages.
+- Proposed next milestone: **R2 — Playback controls + seekable macro timeline**. It is PLANNED only; no R2 app-code implementation or new branch has started in this entry.
+- Technical sequence:
+  - First implement/test playback runtime state and cursor: Pause/Resume must preserve the exact next safe action/group and remaining timing; Stop is terminal. Pause/seek should take effect at safe boundaries rather than interrupting an in-flight gesture.
+  - Then build the bottom timeline UI and transport controls. Initial seek target must snap to recorded gesture-group/action boundaries. True mid-gesture/frame-accurate seeking is not supported by the current data/editor and must not be claimed without path slicing, schema analysis, and tests.
+  - Add persisted playback speed, repeat count/mode, and pre-start delay after their semantics are specified and unit-tested. Proposed safe defaults: speed 1x, one play, zero start delay; no repeat is active by default.
+  - Add Help, Accessibility and Privacy pages using verified app behavior. Explain what the Accessibility service does and does not access; do not imply window-content reading or add permissions without independent justification. Privacy statements must match inspected storage/network behavior.
+- Preserve existing macro JSON/schema compatibility unless a migration is demonstrably necessary. Test old saved macros, action ordering, launch-app waits, GO_BACK/GO_HOME boundaries, rotation/orientation checks and emergency stop.
+- R2 should start from the accepted R1 feature-branch head on a new isolated feature branch. No merge to `main`, no modification to any backup, and no release/publication is authorized by this planning entry.
