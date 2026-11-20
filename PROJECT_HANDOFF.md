@@ -1210,3 +1210,19 @@ Implement the first real, data-backed playback timeline. The previous owner-prov
 - Owner physical-device acceptance on Galaxy A14 / Android 13: **NOT YET RECORDED for R2.2**.
 - Do not describe Timeline as device-accepted until the owner checks notification-to-Timeline entry, play/pause/resume/stop, live drag while a safe macro is running, boundary snapping, previous/next, and confirms there are no stray touches/actions.
 - Keep the Baseline app/package `com.grandmaconnect.preview` installed and untouched. R2.2 is a separate `com.grandmaconnect.feature` debug install, not an in-place update.
+
+
+## R2.2 final install-isolated build — 2026-11-20 (supersedes prior package identity)
+
+- A final installation review caught that the earlier R2.2 APK shared package `com.grandmaconnect.feature` with the installed R2.1 app but had a different ephemeral debug signer. Android would reject it as an in-place update. The earlier R2.2 APK is superseded and should not be installed over R2.1.
+- To preserve R2.1 and its saved macros, the final R2.2 debug package was isolated by changing only the debug application ID suffix to `.feature.r22` and version suffix to `-feature-r22`.
+- Final workflow run: [44771585290](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44771585290), conclusion **success**, head commit `6d5b1c7fb8afeef9ffb6542596a344e05c892f22`.
+- JUnit: **55 tests, 0 failures/errors/skips**; `assembleDebug` success.
+- Final package: `com.grandmaconnect.feature.r22`; label `TouchFlow`; versionName `0.1.0-alpha-feature-r22`.
+- Final APK SHA-256: `668bc2653a32ac7eee61e229683afe4699e00f6919d95f347456aab8b9718912`.
+- Signature verification: PASS (v2); signer certificate SHA-256 `12e6100c83532dc31a93ffa8e850ab9ef4a555b8ead75fe2851ea13fda70b5b4`.
+- Only requested permission remains `android.permission.POST_NOTIFICATIONS`; `canRetrieveWindowContent=false` remains checked by CI.
+- Final source archive: `TouchFlow-R2-2-source.tar.xz`, SHA-256 `8dff399d4d09a0a2be1663000d307d9cb890aa65cf166d377fd9c01843e4d4d3`.
+- Final artifact: [14648256141](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44771585290/artifacts/14648256141), archive SHA-256 `e67881aa38b6d3a5f8ebc93255518d05b5e78e2b8907739d3b39cb409439fc11`; downloaded and both APK/source checksums independently matched the embedded reports.
+- **Install policy:** final R2.2 `.feature.r22` can be installed alongside R2.1 `.feature` and Baseline `.preview`. Do not uninstall either older package or use the superseded `.feature` R2.2 APK.
+- R2.2 device acceptance is still pending. Build/test verification does not substitute for testing the final isolated APK on Galaxy A14 / Android 13.
