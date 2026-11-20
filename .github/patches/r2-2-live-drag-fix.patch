@@ -1,0 +1,15 @@
+diff --git a/GrandmaConnectNative/app/src/main/java/com/grandmaconnect/MainActivity.kt b/GrandmaConnectNative/app/src/main/java/com/grandmaconnect/MainActivity.kt
+index e006541..fabce74 100644
+--- a/GrandmaConnectNative/app/src/main/java/com/grandmaconnect/MainActivity.kt
++++ b/GrandmaConnectNative/app/src/main/java/com/grandmaconnect/MainActivity.kt
+@@ -556,7 +556,9 @@ class MainActivity : Activity() {
+         playbackTimelineView?.setPosition(position)
+         playbackTimeView?.text = "${formatTimelineTime(position)}  /  ${formatTimelineTime(plan.durationMs)}"
+ 
+-        val seekEnabled = !otherRun && (!sameRun || snapshot!!.state == PlaybackState.PAUSED && snapshot.canSeek)
++        // Keep the timeline touchable while playback is active. ACTION_DOWN requests a
++        // safe pause; seek is applied only after the in-flight gesture reaches PAUSED.
++        val seekEnabled = !otherRun && (!sameRun || snapshot!!.canSeek)
+         playbackTimelineView?.setSeekEnabled(seekEnabled)
+         playbackPreviousButton?.isEnabled = !otherRun && (!sameRun || snapshot!!.canSeek)
+         playbackNextButton?.isEnabled = !otherRun && (!sameRun || snapshot!!.canSeek)
