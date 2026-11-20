@@ -1,3 +1,23 @@
+# CURRENT OWNER DECISION — 2026-11-20 (READ FIRST)
+
+**This section supersedes the older “Next implementation milestone — R2.2 Timeline” planning below.** It records the owner's latest direction from the 2026-11-20 conversation. Do not infer unresolved design details.
+
+- **Accepted product baseline:** owner-supplied `TouchFlow-R2-1-debug.apk`, 1,136,439 bytes; locally verified SHA-256 `1163cd2ad42d4975253cd9bc02a0bda7a33d75119d69019e768ee274ed677fcf`. This exactly matches the previously recorded R2.1 build artifact. Owner reports R2.1 worked on the target phone without defects; retain this as owner-reported device acceptance, not a universal guarantee.
+- **Accepted source reference:** `backup/touchflow-r2-1-accepted-2026-11-20` at `6e6ba179d5f836b3da13511210163feadd61d5ee`. This backup is immutable. Do not write to it or `main`.
+- **R2.2 Timeline candidate created by ChatGPT:** explicitly CANCELLED by owner. It is not the product baseline and must not be installed, merged, released, or used as the base for further implementation. Preserve its branch/artifacts as historical evidence; do not delete them unless the owner explicitly asks. Do not attribute that candidate to Claude.
+- **Product direction:** retain the existing TouchFlow recording and macro playback capabilities. The next product update adds an intelligent mission-driven layer that works *with* the existing recording/macro system; this is not a replacement for macros and not a destructive rewrite. The owner describes giving the robot a mission, having it understand what needs to happen and choose/perform the required steps, including when the target app is not already open. The user may teach/explain the intended task to the robot. Exact interaction and execution design are not yet specified.
+- **Offline target:** mission understanding and execution are intended to work without an internet connection. Feasibility, on-device model/runtime, storage/RAM/latency, and Android constraints must be researched by Claude; do not claim this is already implemented or guaranteed.
+- **Do not assume** whether the intelligent layer selects existing macros, creates/records new macros, adapts a macro, or combines these. Claude must inspect the actual R2.1 source/data model and present a grounded design with trade-offs before coding.
+- Preserve existing user recordings and macro compatibility. Do not delete macro data or change the schema unless Claude proves it necessary, documents migration/rollback, and the owner approves.
+- Existing accessibility/privacy behavior is a constraint to inspect, not permission to bypass. The R2.1 workflow checked `canRetrieveWindowContent=false`; do not change this or add permissions silently. Claude must explain any capability gap and any required permission to the owner before implementation.
+- **Version number for the next update is not assigned yet.** Do not call the cancelled Timeline candidate “R2.2” as the next active milestone.
+- **Roles:** Claude is the sole implementation/engineering agent. ChatGPT is coordinator, prompt author, reviewer and documentation assistant; no independent product-code or workflow implementation unless the owner explicitly changes this instruction.
+- **Next session first task:** read this file and `PROJECT_HANDOFF.md` from branch `docs/touchflow-mission-agent-direction-2026-11-20`; verify the R2.1 baseline/file hash; then have Claude inspect the exact R2.1 source and deliver a feasibility/architecture proposal before any implementation. The proposal must explain mission input/teaching, app-not-open launch handling, offline intelligence, interaction with recording/macros, Android/accessibility limits, data compatibility, safety/confirmation boundaries, test plan and staged milestones. Mark unknowns explicitly. Wait for owner approval before coding.
+
+Repository facts at time of this note: `main` was verified at `6c738c2214d4244913fe449ed6172db613f844bd`; the accepted R2.1 backup was verified at `6e6ba179d5f836b3da13511210163feadd61d5ee`. The cancelled R2.2 candidate branch remains separate: `feature/touchflow-r2-2-timeline-2026-11-20` (do not use as the next implementation base).
+
+---
+
 # TouchFlow project state
 
 Last updated: 2026-11-19
