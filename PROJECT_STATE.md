@@ -278,3 +278,34 @@ Update after every material decision, branch, PR, commit, test or failure. Mark 
 - Artifact ID `14648256141`; ZIP SHA-256 `e67881aa38b6d3a5f8ebc93255518d05b5e78e2b8907739d3b39cb409439fc11`. The downloaded ZIP's checksum, APK checksum and source checksum were verified against CI reports.
 - R2.2 package suffix is deliberately isolated to allow side-by-side installation. Keep R2.1 `com.grandmaconnect.feature` and Baseline `com.grandmaconnect.preview` installed; do not uninstall either, and do not install the superseded R2.2 artifact whose package was `com.grandmaconnect.feature`.
 - Current feature branch remains `feature/touchflow-r2-2-timeline-2026-11-20`. R2.2 physical-device acceptance is **PENDING** on Galaxy A14 / Android 13. R2.3 has not started.
+
+
+## OWNER PROCESS CORRECTION — READ FIRST NEXT SESSION (2026-11-20)
+
+**Claude is the designated implementation/coding agent.** ChatGPT must remain coordinator/reviewer/planner and must not independently implement product code unless the owner explicitly authorizes a change.
+
+- In this session ChatGPT independently created R2.2 candidate patches and build workflows. This was a process deviation. Do not attribute this implementation to Claude.
+- Current R2.2 output is an **unreviewed assistant-generated candidate**, not owner-approved or Claude-approved.
+- No PR, merge, release, or publish occurred. Do not continue to R2.3 or accept R2.2 until Claude has independently reviewed the candidate and the owner decides.
+- Next session: Claude must inspect the candidate branch, patch payloads, build artifact/source archive, Timeline calculations, playback state/seek code, gesture/notification safety, test coverage, package isolation and CI. Claude may keep, fix, or replace the candidate.
+- ChatGPT: read-only review/coordination and documentation only until owner explicitly reauthorizes coding.
+
+### Current exact repository state
+- Repo: `hosseinasgari898989-dev/Touchflow`.
+- R2.2 branch: `feature/touchflow-r2-2-timeline-2026-11-20`.
+- Current branch HEAD (after this note is committed): to be read from branch ref at session start; preceding implementation HEAD was `6d5b1c7fb8afeef9ffb6542596a344e05c892f22`.
+- R2.1 base and unchanged backup: `6e6ba179d5f836b3da13511210163feadd61d5ee`.
+- `main` unchanged: `6c738c2214d4244913fe449ed6172db613f844bd`.
+- R2.2 branch is 43 commits ahead of R2.1 base, many are patch-payload transfer commits; history is not clean for PR/merge. Claude should first recommend a clean reconstruction/consolidation strategy.
+- No R2.2 PR currently exists.
+
+### R2.2 candidate CI evidence (not device acceptance)
+- Latest candidate CI: [Run 44771585290](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44771585290) — success.
+- 55/55 JUnit tests; zero failures/errors/skips; `assembleDebug` success.
+- Final candidate package: `com.grandmaconnect.feature.r22`, version `0.1.0-alpha-feature-r22`, label `TouchFlow`.
+- APK SHA-256: `668bc2653a32ac7eee61e229683afe4699e00f6919d95f347456aab8b9718912`.
+- APK v2 signature verified; signer cert SHA-256 `12e6100c83532dc31a93ffa8e850ab9ef4a555b8ead75fe2851ea13fda70b5b4`.
+- Only requested permission: `POST_NOTIFICATIONS`; `canRetrieveWindowContent=false` checked.
+- Artifact ID `14648256141`; final APK file was locally checksum-verified against the CI digest.
+- R2.2 Galaxy A14 / Android 13 device test: **PENDING**. Never claim device acceptance from CI alone.
+- Keep Baseline `com.grandmaconnect.preview` and R2.1 `com.grandmaconnect.feature` untouched. Candidate uses separate `com.grandmaconnect.feature.r22`; superseded intermediate R2.2 APK used `.feature` and must not be installed over R2.1.
