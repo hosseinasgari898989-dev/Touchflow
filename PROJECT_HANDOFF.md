@@ -1127,3 +1127,48 @@ Status: **PLANNED — NOT STARTED**
 
 - نقطهٔ شروع کدنویسی باید یک شاخهٔ جدید و مستقل از آخرین commit پذیرفته‌شدهٔ R1 باشد؛ ابتدا فقط R2.1. هیچ تغییری روی `main`، Backupها، APK مرجع یا Workflowهای انتشار انجام نشود.
 - این بخش فقط تأیید دستگاه و ثبت درخواست/طرح R2 است؛ در آن هیچ کد Android، Manifest، permission، Schema یا Workflow محصولی تغییر نکرده است.
+
+
+## R2.1 CI + owner device acceptance — 2026-11-20
+
+- Active R2 branch: `feature/touchflow-r2-playback-engine-2026-11-20`.
+- R2.1 source archive in the branch: `TouchFlow-R2-1-source.tar.xz`. The R2.1 workflow verified its SHA-256 as `9912a5def4851a5a2d18d9a63ba12b51170e4edcce82b7bdf01ceae211df350d`.
+- Successful CI run: [44728719171](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44728719171), head commit `b9035ca08a8f952126789420a1c2e2e2269f180f`.
+- JUnit evidence from job logs: **45 tests, 0 failures, 0 errors, 0 skipped**. `assembleDebug` succeeded.
+- APK identity: package `com.grandmaconnect.feature`; version `0.1.0-alpha-feature`; app label `TouchFlow`.
+- APK SHA-256: `1163cd2ad42d4975253cd9bc02a0bda7a33d75119d69019e768ee274ed677fcf`.
+- APK signer certificate SHA-256: `7cabfa7b4088be8664326d93113652d562aac4d94eb9c7fe6b636ac082bfdce9`; signature verification succeeded (v2).
+- Manifest permission verification: only `android.permission.POST_NOTIFICATIONS`; workflow also checked `canRetrieveWindowContent="false"`.
+- Build artifact: [14625227024](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44728719171/artifacts/14625227024), name `touchflow-r2-1-build`. APK was extracted from this exact artifact and checksum matched the build log.
+- Workflow attempts 1 and 2 failed before APK production: attempt 1 used the wrong literal path for the test fixture patch; attempt 2 had the inherited `SearchRulesTest` fixture failure. The third run succeeded after correcting only the workflow patch path and retaining the test-fixture-only correction. No production source change was made by those CI corrections.
+- Owner's device feedback (2026-11-20): **R2.1 APK installed/launched and operated successfully; owner reports no defects and says it worked without issues.** Record as `OWNER-REPORTED DEVICE PASS`, not as exhaustive verification of every Android/device edge case.
+- Detailed individual device test cases and timings were not provided; mark them `NOT RECORDED` rather than inventing a checklist completion.
+- The supplied `GrandmaConnect-preview.apk` is the old baseline (same checksum as the recorded baseline), not the R2.1 APK. Do not mix them up.
+- The R2.1 APK uses `com.grandmaconnect.feature` and a debug signer. Keep it as a separate installation; do not replace or uninstall the baseline package `com.grandmaconnect.preview`.
+- No merge to `main`, no change to any backup branch, and no release/publishing operation was performed.
+
+## Next implementation milestone — R2.2 Timeline UI
+
+Status: **NEXT — NOT STARTED**
+
+Implement the first real, data-backed playback timeline. The previous owner-provided visual reference (InShot-inspired bottom timeline) remains the interaction reference; do not recreate the whole app UI or present a decorative/mock timeline.
+
+### R2.2 scope
+1. Bottom timeline with time ruler/labels, current/total time, and a playhead driven by actual playback cursor/time.
+2. Render timeline segments from the saved macro's real gesture groups and ordered actions. Account for recorded gesture durations and action waits using the existing data; do not invent segment timing.
+3. Provide Play, Pause, Resume and terminal Stop controls wired to the R2.1 playback engine.
+4. Provide backward/forward navigation and draggable playhead seeking.
+5. Initial seeking is **boundary-based only**: snap to valid gesture-group/action boundaries supported by the current macro model. No claim of frame-accurate or mid-stroke seeking.
+6. If the user drags while playback is active, pause first, snap the requested position to a valid boundary, and remain paused; require explicit Resume.
+7. Keep the current macro JSON/schema compatible. No schema migration unless source inspection proves it necessary and a separate migration is tested.
+8. Preserve the emergency Stop path, safe pause/resume boundaries, execution ID isolation, Persian RTL, and the current Accessibility privacy boundary (`canRetrieveWindowContent=false`).
+9. Controls must reflect actual engine state. No decorative buttons, fake playback progress, or UI-only seek.
+
+### R2.2 acceptance gates
+- Unit tests for timeline duration/position mapping, boundary snapping (before/at/after boundaries), first/last boundaries, empty and single-group macros, gesture/action ordering and wait intervals.
+- Tests that seeking while running pauses safely, does not interrupt an in-flight gesture, does not execute skipped actions, and resumes exactly from the selected next boundary.
+- Regression tests for Pause/Resume/Stop and stale callback/run-ID isolation from R2.1.
+- Test old R1/R2.1 macro JSON without data loss or unintended behavior.
+- CI must assert the exact expected test count, zero failures/errors/skips, successful debug APK build, package/signature/permission checks, and Accessibility privacy setting.
+- Device acceptance on Galaxy A14 / Android 13 is a separate gate. Build/test success alone does not close it.
+- Before R2.2 coding, inspect the exact R2.1 source archive and engine/model code, create a backup reference and a new isolated feature branch based on accepted R2.1 head. Keep `main`, backups and baseline untouched.
