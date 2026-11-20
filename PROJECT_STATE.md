@@ -172,3 +172,20 @@ Update after every material decision, branch, PR, commit, test or failure. Mark 
 - Run [44641075931] did not reach `assembleDebug`; APK was not produced by that run.
 - Main remains `6c738c2214d4244913fe449ed6172db613f844bd`; no writes targeted main or backup branches.
 - Next: inspect Run `44641623406` logs, confirm 24/24 JUnit and assembleDebug, then inspect APK signature/package/permission report. Only after CI passes should owner install and execute the 18-item R1 device checklist. R1 is not yet device-verified.
+
+
+## R1 CI final result — SUCCESS (2026-11-20)
+
+- Successful run: [44641623406](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44641623406), branch `feature/touchflow-r1-recording-actions-2026-11-20`, commit `fffe19113724c2c85c909fd35bac302c253d3cff`; conclusion `success`.
+- Exact R1 archive SHA-256 verification: PASS (`4e0e00918e0b3f172d02daa9262d1d2da3c130872583bcc726aabd5ac35e12d3`).
+- In-workflow test-fixture-only correction applied after extraction: Persian query token `چت` -> English package token `chat` in the inherited `SearchRulesTest` assertion. The source archive and production app code remain unchanged by this correction.
+- JUnit: **24 tests, 0 failures, 0 errors, 0 skipped**. Exact count assertion passed.
+- `assembleDebug`: PASS.
+- APK verification: package `com.grandmaconnect.feature`; label `TouchFlow`; version `0.1.0-alpha-feature`; APK signature verified with v2 scheme.
+- APK SHA-256: `NOT EXTRACTED FROM LOG` (the file `apk.sha256` is included in the artifact; inspect it before recording a value).
+- Signer certificate SHA-256: `084ac46148aa989df58bd03d7254dfa4e62c7f7971104dd2adcc2c34e5ad4599` (debug signer; not the baseline signing key).
+- APK permissions: exactly `android.permission.POST_NOTIFICATIONS`; allowlist comparison PASS. The CI step also passed the source check that `canRetrieveWindowContent="false"`.
+- Artifact: [14587006288](https://github.com/hosseinasgari898989-dev/Touchflow/actions/runs/44641623406/artifacts/14587006288), name `touchflow-r1-build`, size 1,137,274 bytes, expires 2026-12-19.
+- R1 gate: **CI BUILD + JUNIT PASSED**. This is not device verification. The 18 items in `docs/R1-DEVICE-CHECKLIST-fa.md` remain unchecked until the owner tests the APK on Galaxy A14 / Android 13.
+- Next owner action: download APK from the artifact, install as the separate package `com.grandmaconnect.feature` (do not replace `com.grandmaconnect.preview`), then execute the R1 device checklist. Report failures or completed items; do not mark every checklist item done without testing.
+- Main last verified at `6c738c2214d4244913fe449ed6172db613f844bd`; no write operation in this task targeted main or backup branches.
